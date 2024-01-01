@@ -31,9 +31,38 @@ class Simulator:
             'DAD':None,
             'DAA':None
         }
+
+        self.__param_rule = {
+            'MOV':(2,1,1),
+            'MVI':(2,1,3),
+            'LXI':(2,1,5),
+            'LDA':(1,5),
+            'STA':(1,5),
+            'LDAX':(1,1),
+            'STAX':(1,1),
+            'LHLD':(1,5),
+            'SHLD':(1,5),
+            'IN':(1,3),
+            'OUT':(1,3),
+            'ADD':None,
+            'ADI':None,
+            'ADC':None,
+            'SUB':None,
+            'SUI':None,
+            'SBB':None,
+            'SBI':None,
+            'INR':None,
+            'DCR':None,
+            'INX':None,
+            'DCX':None,
+            'DAD':None,
+            'DAA':None
+        }
     
     def op_code(self,code:str):
         return self.__op_code[code]
+    
+    def param(self):return self.__param_rule
 
     def show(self,exmin:str,address:str):
         if exmin == 'M': return self._memory_address[address]
