@@ -33,6 +33,7 @@ class Interface(Cmd):
         400: syntax error -> param:2
         500: register error -> param
         550: memory error -> param
+        570: port error -> param
         600: register error -> param:1
         650: memory error -> param:1
         700: register error -> param:2
@@ -52,6 +53,7 @@ class Interface(Cmd):
                 else: 
                     if len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(): return 500
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 550
+                    elif len(prompt[0]) == 3 and prompt[0] not in self.mP.show_port().keys(): return 570
                     else: return prompt
             
             else:
@@ -251,30 +253,45 @@ class Interface(Cmd):
         elif status == 200 or status == 500: print(f'Error: enter a valid memory location')
         else:
             self.mP.op_code('LHLD')(status[0])
-            
+
     def do_SHLD(self,arg:str):
         status = self.check_param('SHLD',arg)
         if status == 100: print('Error: invalid parameter, should be SHLD 16 bit memory location (hex)')
         elif status == 200 or status == 500: print(f'Error: enter a valid memory location')
         else:
             self.mP.op_code('SHLD')(status[0])
+    
+    def do_IN(self,arg:str):
+        status = self.check_param('IN',arg)
+        if status == 100: print('Error: invalid parameter, should be IN 8 bit port location (hex)')
+        elif status == 200 or status == 500: print(f'Error: enter a valid port location')
+        else:
+            self.mP.op_code('IN')(status[0])
+
+    def do_OUT(self,arg:str):
+        status = self.check_param('OUT',arg)
+        if status == 100: print('Error: invalid parameter, should be IN 8 bit port location (hex)')
+        elif status == 200 or status == 570: print(f'Error: enter a valid port location')
+        else:
+            self.mP.op_code('OUT')(status[0])
 
     def do_exmin_memory(self,arg:str):
         """
-        Display memory and its contents.
+        Display memory addresses and their contents.
 
         Args:
-            arg (str): Memory address to be displayed.
+            arg (str): Comma-separated list of memory addresses.
 
         Raises:
             KeyError: If the provided memory address is invalid.
 
         Example:
-            > exmin_memory 2000H
+            > exmin_memory 2000H, 3000H
             +----------------+--------+
             | Memory Address | Content|
             +----------------+--------+
-            | 2000H          | 1A     |
+            |     2000H      |   1A   |
+            |     3000H      |   FF   |
             +----------------+--------+
         """
         memory_table = PrettyTable(['Memory Address', 'Content'])
@@ -285,6 +302,34 @@ class Interface(Cmd):
         except KeyError: print("Error: Invalid argument!")
 
         else: print(memory_table)
+
+    def do_exmin_port(self,arg:str):
+        """
+        Display port addresses and their contents.
+
+        Args:
+            arg (str): Comma-separated list of port addresses.
+
+        Raises:
+            KeyError: If the provided port address is invalid.
+
+        Example:
+            > exmin_port 10H, 20H
+            +--------------+---------+
+            | Port Address | Content |
+            +--------------+---------+
+            |     10H      |   0A    |
+            |     20H      |   FF    |
+            +--------------+---------+
+        """
+        port_table = PrettyTable(['Port Address', 'Content'])
+        try:
+            for i in arg.split(','):
+                port_table.add_row([i.upper(),self.mP.show('P',i.upper())])
+
+        except KeyError: print("Error: Invalid argument!")
+
+        else: print(port_table)
 
     def do_exmin_memol(self,arg):
         """
@@ -340,17 +385,14 @@ class Interface(Cmd):
 
         Example:
             > exmin_flag
-            +-----+-------+
-            | Flag| Value |
-            +-----+-------+
-            | S   | 0     |
-            | Z   | 0     |
-            | ... | ...   |
-            +-----+-------+
+            +---+---+----+---+---+
+            | S | Z | AC | P | C |
+            +---+---+----+---+---+
+            | 0 | 0 | 0  | 0 | 0 |
+            +---+---+----+---+---+
         """
-        flag_table = PrettyTable(['Flag', 'Value'])
-        for i in self.mP.show_flag():
-            flag_table.add_row([i,self.mP.show('F',i)])
+        flag_table = PrettyTable([i for i in self.mP.show_flag()])
+        flag_table.add_row([self.mP.show('F',i) for i in self.mP.show_flag()])
         
         print(flag_table)
     
