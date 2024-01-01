@@ -2,7 +2,7 @@ from prettytable import PrettyTable
 
 class Simulator:
     def __init__(self):
-        self._memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
+        self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
         self.__port = {hex(i)[2:].upper() + 'H':'0' for i in range(256)}
         self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
         self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
@@ -66,7 +66,7 @@ class Simulator:
     def param(self):return self.__param_rule
 
     def show(self,exmin:str,address:str):
-        if exmin == 'M': return self._memory_address[address]
+        if exmin == 'M': return self.__memory_address[address]
         
         elif exmin == 'R': return self.__registers[address]
 
@@ -77,7 +77,7 @@ class Simulator:
         else: return False
     
     def show_memory(self):
-        return self._memory_address
+        return self.__memory_address
 
     def show_register(self):
         return self.__registers
@@ -89,65 +89,60 @@ class Simulator:
         return self.__port
 
     def __mov(self,rd:str,rs:str):
-        if rd in self.__registers.keys():
-            if rd == 'M':
-                self._memory_address[self.__registers['H'] + self.__registers['L']] =  rs
-            elif rs == 'M':
-                self.__registers['H'] = rd[:2]
-                self.__registers['L'] = rd[2:]
-            else:
-                self.__registers[rd] = self.__registers[rs]
+        if rd == 'M':
+            if self.__registers['H'] + self.__registers['L'] + 'H' in self.__memory_address:
+                self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  rs
+        elif rs == 'M':
+            self.__registers['H'] = rd[:2]
+            self.__registers['L'] = rd[2:]
+        else:
+            self.__registers[rd] = self.__registers[rs]
 
     def __mvi(self,r:str,data:str):
-        if r in self.__registers.keys():
-            if r == 'M':
-                self._memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  data
-            else:
-                self.__registers[r] = data
+        if r == 'M':
+            if self.__registers['H'] + self.__registers['L'] + 'H' in self.__memory_address:
+                self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  data
+        else:
+            self.__registers[r] = data
 
     def __lxi(self,rp:str,data:str):
-        if rp in self.__registers.keys():
-            if rp == 'B':
-                self.__registers[rp] = data[:2]
-                self.__registers['C'] = data[2:-1]
-            
-            elif rp == 'D':
-                self.__registers[rp] = data[:2]
-                self.__registers['E'] = data[2:-1]
-            
-            elif rp == 'H':
-                self.__registers[rp] = data[:2]
-                self.__registers['L'] = data[2:-1]
+        if rp == 'B':
+            self.__registers[rp] = data[:2]
+            self.__registers['C'] = data[2:-1]
+        
+        elif rp == 'D':
+            self.__registers[rp] = data[:2]
+            self.__registers['E'] = data[2:-1]
+        
+        elif rp == 'H':
+            self.__registers[rp] = data[:2]
+            self.__registers['L'] = data[2:-1]
 
     def __lda(self,ma:str):
-        if ma in self._memory_address.keys():
-            self.__registers['A'] =  self._memory_address[ma]
+        self.__registers['A'] =  self.__memory_address[ma]
     
     def __sta(self, ma:str):
-        if ma in self._memory_address.keys():
-            self._memory_address[ma] = self.__registers['A']    
+        self.__memory_address[ma] = self.__registers['A']    
 
     def __ldax(self,rp:str):
-        if rp in self.__registers.keys():
-            if rp == 'B':
-                self.__registers['A'] = self._memory_address[self.__registers['B'] + self.__registers['C'] + 'H']  
-            elif rp == 'D':
-                self.__registers['A'] = self._memory_address[self.__registers['D'] + self.__registers['E'] + 'H']
+        if rp == 'B':
+            self.__registers['A'] = self.__memory_address[self.__registers['B'] + self.__registers['C'] + 'H']  
+        elif rp == 'D':
+            self.__registers['A'] = self.__memory_address[self.__registers['D'] + self.__registers['E'] + 'H']
     
     def __stax(self,rp:str):
-        if rp in self.__registers.keys():
-            if rp == 'B':
-                self._memory_address[self.__registers['B'] + self.__registers['C'] + 'H'] = self.__registers['A'] 
-            elif rp == 'D':
-                 self._memory_address[self.__registers['D'] + self.__registers['E'] + 'H'] = self.__registers['A']
+        if rp == 'B':
+            self.__memory_address[self.__registers['B'] + self.__registers['C'] + 'H'] = self.__registers['A'] 
+        elif rp == 'D':
+                self.__memory_address[self.__registers['D'] + self.__registers['E'] + 'H'] = self.__registers['A']
 
     def __lhld(self,ma:str):
-        self.__registers['L'] = self._memory_address[ma]
-        self.__registers['H'] = self._memory_address[str(int(ma[:-1]) + 1) + 'H']
+        self.__registers['L'] = self.__memory_address[ma]
+        self.__registers['H'] = self.__memory_address[str(int(ma[:-1]) + 1) + 'H']
 
     def __shld(self,ma:str):
-        self._memory_address[ma] = self.__registers['L'] 
-        self._memory_address[str(int(ma[:-1]) + 1) + 'H'] = self.__registers['H']
+        self.__memory_address[ma] = self.__registers['L'] 
+        self.__memory_address[str(int(ma[:-1]) + 1) + 'H'] = self.__registers['H']
     
     def __in(self,port:str):
         self.__registers['A'] = port
