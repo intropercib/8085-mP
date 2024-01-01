@@ -3,6 +3,7 @@ from prettytable import PrettyTable
 class Simulator:
     def __init__(self):
         self._memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
+        self.__port = {hex(i)[2:].upper() + 'H':'0' for i in range(256)}
         self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
         self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
         self.__op_code = {
@@ -70,6 +71,8 @@ class Simulator:
         elif exmin == 'R': return self.__registers[address]
 
         elif exmin == 'F': return self.__flags[address]
+
+        elif exmin == 'P': return self.__port[address]
         
         else: return False
     
@@ -81,6 +84,9 @@ class Simulator:
     
     def show_flag(self):
         return self.__flags
+    
+    def show_port(self):
+        return self.__port
 
     def __mov(self,rd:str,rs:str):
         if rd in self.__registers.keys():
@@ -147,4 +153,4 @@ class Simulator:
         self.__registers['A'] = port
     
     def __out(self,port:str):
-        port = self.__registers['A']
+        self.__port[port] = self.__registers['A']
