@@ -13,12 +13,15 @@ class Interface(Cmd):
     Get started by entering commands such as 'MOV A, B' or 'LXI H, 2000H'.
     """
     prompt = "> "
-    doc_header = "Help line"
+    doc_header = "Avaliable Help"
     ruler = '-'
 
     def __init__(self):
         super().__init__()
         self.mP = Simulator()
+
+    def default(self,line):
+        print(f"Unknown command: {line}.\nType 'help' for a list of commands.")
 
     def do_quit(self, arg):
         "Quits your program"
@@ -248,6 +251,18 @@ class Interface(Cmd):
             self.mP.op_code('STAX')(status[0])
     
     def do_LHLD(self,arg:str):
+        """
+        Load HL register pair with data from specified memory address.
+
+        Args:
+            arg (str): 16-bit memory location in hexadecimal.
+
+        Raises:
+            ValueError: If the syntax is incorrect or if the memory location is invalid.
+
+        Example:
+            > LHLD 2000H
+        """
         status = self.check_param('LHLD',arg)
         if status == 100: print('Error: invalid parameter, should be LHLD 16 bit memory location (hex)')
         elif status == 200 or status == 500: print(f'Error: enter a valid memory location')
@@ -255,6 +270,18 @@ class Interface(Cmd):
             self.mP.op_code('LHLD')(status[0])
 
     def do_SHLD(self,arg:str):
+        """
+        Store the content of HL register pair at the specified memory address.
+
+        Args:
+            arg (str): 16-bit memory location in hexadecimal.
+
+        Raises:
+            ValueError: If the syntax is incorrect or if the memory location is invalid.
+
+        Example:
+            > SHLD 2000H
+        """
         status = self.check_param('SHLD',arg)
         if status == 100: print('Error: invalid parameter, should be SHLD 16 bit memory location (hex)')
         elif status == 200 or status == 500: print(f'Error: enter a valid memory location')
@@ -262,6 +289,18 @@ class Interface(Cmd):
             self.mP.op_code('SHLD')(status[0])
     
     def do_IN(self,arg:str):
+        """
+        Input data from the specified 8-bit port location into the accumulator (A).
+
+        Args:
+            arg (str): 8-bit port location in hexadecimal.
+
+        Raises:
+            ValueError: If the syntax is incorrect or if the port location is invalid.
+
+        Example:
+            > IN 10H
+        """
         status = self.check_param('IN',arg)
         if status == 100: print('Error: invalid parameter, should be IN 8 bit port location (hex)')
         elif status == 200 or status == 500: print(f'Error: enter a valid port location')
@@ -269,6 +308,18 @@ class Interface(Cmd):
             self.mP.op_code('IN')(status[0])
 
     def do_OUT(self,arg:str):
+        """
+        Output data from the accumulator (A) to the specified 8-bit port location.
+
+        Args:
+            arg (str): 8-bit port location in hexadecimal.
+
+        Raises:
+            ValueError: If the syntax is incorrect or if the port location is invalid.
+
+        Example:
+            > OUT 20H
+        """
         status = self.check_param('OUT',arg)
         if status == 100: print('Error: invalid parameter, should be IN 8 bit port location (hex)')
         elif status == 200 or status == 570: print(f'Error: enter a valid port location')
