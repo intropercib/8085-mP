@@ -55,7 +55,7 @@ class Interface(Cmd):
                 else: 
                     if len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(): return 500
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 550
-                    elif len(prompt[0]) == 3 and prompt[0] not in self.mP.show_port().keys(): return 570
+                    elif len(prompt[0]) == 3 or len(prompt[0]) == 2 and prompt[0] not in self.mP.show_port().keys(): return 570
                     else: return prompt
             
             else:
@@ -69,7 +69,7 @@ class Interface(Cmd):
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 650
                     elif len(prompt[1]) == 1 and prompt[1] not in self.mP.show_register().keys(): return 700
                     elif len(prompt[1]) == 5 and prompt[1] not in self.mP.show_memory().keys(): return 750
-                    elif len(prompt[1]) == 3 and prompt[1] not in self.mP.show_port().keys(): return 780
+                    elif len(prompt[0]) == 3 or len(prompt[0]) == 2 and prompt[1] not in self.mP.show_port().keys(): return 780
                     else: return prompt
 
     def do_MOV(self, arg:str):
@@ -327,11 +327,11 @@ class Interface(Cmd):
         else:
             self.mP.op_code('OUT')(status[0])
     
-    # def do_XCHG(self,arg):
-    #     status = self.check_param('XCHG',arg)
-    #     if status == 100: print("XCHG takes no argument!")
-    #     else:
-    #         self.mP.op_code('XCHG')
+    def do_XCHG(self,arg):
+        status = self.check_param('XCHG',arg)
+        if status == 100: print("XCHG takes no argument!")
+        else:
+            self.mP.op_code('XCHG')()
 
     
     def do_ADD(self,arg:str):

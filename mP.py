@@ -16,7 +16,7 @@ class Simulator:
             'STAX':self.__stax,
             'LHLD':self.__lhld,
             'SHLD':self.__shld,
-            # 'XCHG':self.__xchg,
+            'XCHG':self.__xchg,
             'IN':self.__in,
             'OUT':self.__out,
             'ADD':self.__add,
@@ -146,8 +146,9 @@ class Simulator:
         self.__memory_address[ma] = self.__registers['L'] 
         self.__memory_address[str(int(ma[:-1]) + 1) + 'H'] = self.__registers['H']
     
-    # def __xchg(self):
-    #     self.__memory_address[self.__registers['D']],self.__memory_address[self.__registers['E']] = self.__memory_address[self.__registers['H']],self.__memory_address[self.__registers['L']]
+    def __xchg(self):
+        self.__registers['D'],self.__registers['H'] = self.__registers['H'],self.__registers['D']
+        self.__registers['E'],self.__registers['L'] = self.__registers['L'],self.__registers['E']
     
     def __in(self,port:str):
         self.__registers['A'] = port
