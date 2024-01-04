@@ -41,11 +41,10 @@ class Interface(Cmd):
         650: memory error -> param:1
         700: register error -> param:2
         750: memory error -> param:2
+        780: port error -> param:1
         """
-
         prompt = arg.upper().replace(' ', '').split(',')
         check_list = self.mP.param()
-
         if len(check_list[inst][1:]) != len(prompt): return 100
         
         else:
@@ -70,6 +69,7 @@ class Interface(Cmd):
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 650
                     elif len(prompt[1]) == 1 and prompt[1] not in self.mP.show_register().keys(): return 700
                     elif len(prompt[1]) == 5 and prompt[1] not in self.mP.show_memory().keys(): return 750
+                    elif len(prompt[1]) == 3 and prompt[1] not in self.mP.show_port().keys(): return 780
                     else: return prompt
 
     def do_MOV(self, arg:str):
@@ -128,9 +128,10 @@ class Interface(Cmd):
         elif status == 300: print("Error: R should be a register")
         elif status == 400: print("Error: Content should be of 8 bit (hex)")
         elif status == 600: print(f"Error: {arg.replace(' ','').split(',')[0]} not a register")
+        elif status == 780: print(f"Error: {arg.replace(' ','').split(',')[1]} not a hexadecimal value")
         else:
             r,data = status
-            self.mP.op_code('MVI')(r,data)        
+            self.mP.op_code('MVI')(r,data)
 
     def do_LXI(self, arg:str):
         """
@@ -325,6 +326,33 @@ class Interface(Cmd):
         elif status == 200 or status == 570: print(f'Error: enter a valid port location')
         else:
             self.mP.op_code('OUT')(status[0])
+    
+    # def do_XCHG(self,arg):
+    #     status = self.check_param('XCHG',arg)
+    #     if status == 100: print("XCHG takes no argument!")
+    #     else:
+    #         self.mP.op_code('XCHG')
+
+    
+    def do_ADD(self,arg:str):
+        """
+        Add the content of the specified register to the accumulator.
+
+        Args:
+            arg (str): The register (r) whose content will be added to the accumulator.
+
+        Raises:
+            - If the syntax is incorrect or if there are additional parameters.
+            - If the specified register (r) is not valid.
+
+        Example:
+            > ADD B
+        """
+        status = self.check_param('ADD',arg)
+        if status == 100: print('Error: invalid parameter, should be ADD r')
+        elif status == 200 or status == 570: print(f'Error: enter a valid register')
+        else:
+            self.mP.op_code('ADD')(status[0])
 
     def do_exmin_memory(self,arg:str):
         """
