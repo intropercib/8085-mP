@@ -16,9 +16,10 @@ class Simulator:
             'STAX':self.__stax,
             'LHLD':self.__lhld,
             'SHLD':self.__shld,
+            # 'XCHG':self.__xchg,
             'IN':self.__in,
             'OUT':self.__out,
-            'ADD':None,
+            'ADD':self.__add,
             'ADI':None,
             'ADC':None,
             'SUB':None,
@@ -43,9 +44,10 @@ class Simulator:
             'STAX':(1,1),
             'LHLD':(1,5),
             'SHLD':(1,5),
+            'XCHG':(0,1),
             'IN':(1,3),
             'OUT':(1,3),
-            'ADD':None,
+            'ADD':(1,1),
             'ADI':None,
             'ADC':None,
             'SUB':None,
@@ -144,8 +146,14 @@ class Simulator:
         self.__memory_address[ma] = self.__registers['L'] 
         self.__memory_address[str(int(ma[:-1]) + 1) + 'H'] = self.__registers['H']
     
+    # def __xchg(self):
+    #     self.__memory_address[self.__registers['D']],self.__memory_address[self.__registers['E']] = self.__memory_address[self.__registers['H']],self.__memory_address[self.__registers['L']]
+    
     def __in(self,port:str):
         self.__registers['A'] = port
     
     def __out(self,port:str):
         self.__port[port] = self.__registers['A']
+    
+    def __add(self,r:str):
+        self.__registers['A'] = hex(int(self.__registers['A'].replace('H',''),16) +  int(self.__registers[r].replace('H',''),16))[2:].upper() + 'H'
