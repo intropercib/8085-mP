@@ -55,21 +55,19 @@ class Interface(Cmd):
                 else: 
                     if len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(): return 500
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 550
-                    elif len(prompt[0]) == 3 or len(prompt[0]) == 2 and prompt[0] not in self.mP.show_port().keys(): return 570
+                    elif (len(prompt[0]) == 3 or len(prompt[0]) == 2) and prompt[0] not in self.mP.show_port().keys(): return 570
                     else: return prompt
             
             else:
                 if arg.find(',') == -1: return 50
                 if  check_list[inst][1] != len(prompt[0]): return 300
-
                 elif  check_list[inst][2] != len(prompt[1]): return 400
-                
                 else:
                     if len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(): return 600
                     elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 650
                     elif len(prompt[1]) == 1 and prompt[1] not in self.mP.show_register().keys(): return 700
                     elif len(prompt[1]) == 5 and prompt[1] not in self.mP.show_memory().keys(): return 750
-                    elif len(prompt[0]) == 3 or len(prompt[0]) == 2 and prompt[1] not in self.mP.show_port().keys(): return 780
+                    elif (len(prompt[0]) == 3 or len(prompt[0]) == 2) and prompt[1] not in self.mP.show_port().keys(): return 780
                     else: return prompt
 
     def do_MOV(self, arg:str):
@@ -237,9 +235,8 @@ class Interface(Cmd):
             arg (str): String representing the instruction with the register pair.
 
         Raises:
-            ValueError:
-                - If there are insufficient parameters (should be STAX register pair (rp)).
-                - If 'rp' is not a valid register pair.
+            - If there are insufficient parameters (should be STAX register pair (rp)).
+            - If 'rp' is not a valid register pair.
 
         Example:
             > STAX D
@@ -259,7 +256,7 @@ class Interface(Cmd):
             arg (str): 16-bit memory location in hexadecimal.
 
         Raises:
-            ValueError: If the syntax is incorrect or if the memory location is invalid.
+            - If the syntax is incorrect or if the memory location is invalid.
 
         Example:
             > LHLD 2000H
@@ -278,7 +275,7 @@ class Interface(Cmd):
             arg (str): 16-bit memory location in hexadecimal.
 
         Raises:
-            ValueError: If the syntax is incorrect or if the memory location is invalid.
+            - If the syntax is incorrect or if the memory location is invalid.
 
         Example:
             > SHLD 2000H
@@ -297,7 +294,7 @@ class Interface(Cmd):
             arg (str): 8-bit port location in hexadecimal.
 
         Raises:
-            ValueError: If the syntax is incorrect or if the port location is invalid.
+            - If the syntax is incorrect or if the port location is invalid.
 
         Example:
             > IN 10H
@@ -316,7 +313,7 @@ class Interface(Cmd):
             arg (str): 8-bit port location in hexadecimal.
 
         Raises:
-            ValueError: If the syntax is incorrect or if the port location is invalid.
+            - If the syntax is incorrect or if the port location is invalid.
 
         Example:
             > OUT 20H
@@ -328,6 +325,20 @@ class Interface(Cmd):
             self.mP.op_code('OUT')(status[0])
     
     def do_XCHG(self,arg):
+        """
+        Exchange the contents of the DE and HL register pairs.
+
+        Args:
+            arg (str): Not used.
+
+        Raises:
+            - If the command is followed by an argument (XCHG takes no argument).
+
+        Example:
+            > XCHG
+            DE and HL register pairs after XCHG:
+            DE: 12F6   HL: AB78
+        """
         status = self.check_param('XCHG',arg)
         if status == 100: print("XCHG takes no argument!")
         else:
@@ -353,6 +364,68 @@ class Interface(Cmd):
         elif status == 200 or status == 570: print(f'Error: enter a valid register')
         else:
             self.mP.op_code('ADD')(status[0])
+
+    def do_ADI(self,arg:str):
+        """
+        Add immediate data to the accumulator.
+
+        Args:
+            arg (str): 8-bit hexadecimal data to be added to the accumulator (ADI 8 bit data).
+
+        Raises:
+            - If the syntax is incorrect or if there are additional parameters.
+            - If the specified data is not a valid 8-bit hexadecimal value.
+
+        Example:
+            > ADI 3F
+            Accumulator (A) after ADI 3F: 7A
+        """
+        status = self.check_param('ADI',arg)
+        if status == 100: print('Error: invalid parameter, should be ADI 8 bit data (hex)')
+        elif status == 200 or status == 570: print(f'Error: invalid data {arg}')
+        else:
+            self.mP.op_code('ADI')(status[0])
+    
+    def do_SUB(self,arg:str):
+        """
+        Add the content of the specified register to the accumulator.
+
+        Args:
+            arg (str): The register (r) whose content will be subracted to the accumulator.
+
+        Raises:
+            - If the syntax is incorrect or if there are additional parameters.
+            - If the specified register (r) is not valid.
+
+        Example:
+            > SUB B
+        """
+        status = self.check_param('SUB',arg)
+        if status == 100: print('Error: invalid parameter, should be SUB r')
+        elif status == 200 or status == 570: print(f'Error: enter a valid register')
+        else:
+            self.mP.op_code('SUB')(status[0])
+
+    def do_SUI(self,arg:str):
+        """
+        Subtract immediate data from the accumulator.
+
+        Args:
+            arg (str): 8-bit hexadecimal data to be subtracted from the accumulator (SUI 8 bit data).
+
+        Raises:
+            - If the syntax is incorrect or if there are additional parameters.
+            - If the specified data is not a valid 8-bit hexadecimal value.
+
+        Example:
+            > SUI 02
+            Accumulator (A) after SUI 02: 7D
+        """
+        status = self.check_param('SUI',arg)
+        if status == 100: print('Error: invalid parameter, should be SUI 8 bit data (hex)')
+        elif status == 200 or status == 570: print(f'Error: invalid data {arg}')
+        else:
+            self.mP.op_code('SUI')(status[0])
 
     def do_exmin_memory(self,arg:str):
         """
