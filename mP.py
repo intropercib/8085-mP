@@ -20,10 +20,10 @@ class Simulator:
             'IN':self.__in,
             'OUT':self.__out,
             'ADD':self.__add,
-            'ADI':None,
+            'ADI':self.__adi,
             'ADC':None,
-            'SUB':None,
-            'SUI':None,
+            'SUB':self.__sub,
+            'SUI':self.__sui,
             'SBB':None,
             'SBI':None,
             'INR':None,
@@ -48,10 +48,10 @@ class Simulator:
             'IN':(1,3),
             'OUT':(1,3),
             'ADD':(1,1),
-            'ADI':None,
+            'ADI':(1,3),
             'ADC':None,
-            'SUB':None,
-            'SUI':None,
+            'SUB':(1,1),
+            'SUI':(1,3),
             'SBB':None,
             'SBI':None,
             'INR':None,
@@ -92,11 +92,9 @@ class Simulator:
 
     def __mov(self,rd:str,rs:str):
         if rd == 'M':
-            if self.__registers['H'] + self.__registers['L'] + 'H' in self.__memory_address:
-                self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  rs
+            self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  rs
         elif rs == 'M':
-            self.__registers['H'] = rd[:2]
-            self.__registers['L'] = rd[2:]
+            self.__registers[rd] = self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H']
         else:
             self.__registers[rd] = self.__registers[rs]
 
@@ -158,3 +156,12 @@ class Simulator:
     
     def __add(self,r:str):
         self.__registers['A'] = hex(int(self.__registers['A'].replace('H',''),16) +  int(self.__registers[r].replace('H',''),16))[2:].upper() + 'H'
+
+    def __adi(self,data:str):
+        self.__registers['A'] = hex(int(self.__registers['A'].replace('H',''),16) +  int(data.replace('H',''),16))[2:].upper() + 'H'
+
+    def __sub(self,r:str):
+        self.__registers['A'] = hex( abs(int(self.__registers['A'].replace('H',''),16) -  int(self.__registers[r].replace('H',''),16)) )[2:].upper() + 'H'
+    
+    def __sui(self,data:str):
+        self.__registers['A'] = hex(abs(int(self.__registers['A'].replace('H',''),16) -  int(data.replace('H',''),16)))[2:].upper() + 'H'
