@@ -26,15 +26,15 @@ pip install prettytable
 ### Running the Simulator
 1. Clone the repository:
 ```bash
-git clone https://github.com/your_username 8085-microprocessor-simulator.git
+https://github.com/girisakar365/8085-mP.git
 ```
 2. Navigate to the project directory:
 ```bash
-cd 8085-microprocessor-simulator
+cd 8085-mP
 ```
 3. Run the CLI:
 ```bash
-python simulator_cli.py
+python CLI.py
 ```
 
 ## Usage
