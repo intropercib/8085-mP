@@ -69,5 +69,9 @@ The simulator is compatible with Windows, Linux, and macOS.
 - Linux: Ensure you have the necessary dependencies by running the command mentioned under "Prerequisites."
 - macOS: Similar to Linux, ensure the required dependencies are installed.
 
+## Currently Working On:
+1. Logical Group `main`
+2. Branching Group
+
 ## Contributing
 Feel free to contribute to the project by opening issues or submitting pull requests. Your feedback and contributions are highly appreciated. Happy coding!
