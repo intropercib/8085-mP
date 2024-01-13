@@ -32,6 +32,9 @@ class Interface(Cmd):
             'MemoryError':lambda memory:print(f'MemoryError: {memory} should be a valid 16-bit memory address.'),
             'PortError':lambda port:print(f'PortError: {port} should be a vaild 8-bit port address.')
         }
+        if os.name == 'nt': os.system('CLS')
+        elif os.name == 'posix': os.system('clear')
+
 
     def default(self,line):
         print(f"Unknown command: {line}.\nType 'help' for a list of commands.")
