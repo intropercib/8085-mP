@@ -56,9 +56,18 @@ python simulator_cli.py
 > clear
 ```
 ### Note
-Ensure that you provide valid arguments and follow the correct syntax for each instruction.
-
-For additional information on specific commands, use the help command followed by the command name. For example:
+1. As of now, not all instructions are available, and updates are constantly being made. Instructions up to arithmetic operations are supported.
+2. Ensure that you provide valid arguments and follow the correct syntax for each instruction. For additional information on specific commands, use the help command followed by the command name. For example:
 ```bash
 > help MOV
 ```
+
+## Supported Platforms
+The simulator is compatible with Windows, Linux, and macOS.
+
+- Windows: No additional considerations.
+- Linux: Ensure you have the necessary dependencies by running the command mentioned under "Prerequisites."
+- macOS: Similar to Linux, ensure the required dependencies are installed.
+
+## Contributing
+Feel free to contribute to the project by opening issues or submitting pull requests. Your feedback and contributions are highly appreciated. Happy coding!
