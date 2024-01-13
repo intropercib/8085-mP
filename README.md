@@ -56,7 +56,7 @@ python simulator_cli.py
 > clear
 ```
 ### Note
-1. As of now, not all instructions are available, and updates are constantly being made. Instructions up to arithmetic operations are supported.
+1. __As of now, not all instructions are available, and updates are constantly being made. Instructions up to arithmetic operations are supported__.
 2. Ensure that you provide valid arguments and follow the correct syntax for each instruction. For additional information on specific commands, use the help command followed by the command name. For example:
 ```bash
 > help MOV
