@@ -1,5 +1,5 @@
 from cmd import Cmd
-from os import system
+import os
 from prettytable import PrettyTable
 from mP import Simulator
 
@@ -841,7 +841,8 @@ class Interface(Cmd):
             > clear
             Console screen cleared.
         """
-        system('CLS')
+        if os.name == 'nt': os.system('CLS')
+        elif os.name == 'posix': os.system('clear')
 
     do_cls = do_clear
 
