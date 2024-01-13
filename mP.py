@@ -3,7 +3,10 @@ from prettytable import PrettyTable
 class Simulator:
     def __init__(self):
         self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
-        self.__port = {hex(i)[2:].upper() + 'H':'0' for i in range(256)}
+        self.__port = {}
+        for i in range(256):
+            if len(hex(i)[2:]) == 1 :self.__port['0' + hex(i)[2:].upper() + 'H'] = '0'
+            else: self.__port[hex(i)[2:].upper() + 'H'] = '0'
         self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
         self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
         self.__op_code = {
@@ -21,17 +24,21 @@ class Simulator:
             'OUT':self.__out,
             'ADD':self.__add,
             'ADI':self.__adi,
-            'ADC':None,
+            'ADC':self.__adc,
             'SUB':self.__sub,
             'SUI':self.__sui,
-            'SBB':None,
-            'SBI':None,
-            'INR':None,
-            'DCR':None,
-            'INX':None,
-            'DCX':None,
-            'DAD':None,
-            'DAA':None
+            'SBB':self.__sbb,
+            'SBI':self.__sbi,
+            'INR':self.__inr,
+            'DCR':self.__dcr,
+            'INX':self.__inx,
+            'DCX':self.__dcx,
+            'DAD':self.__dad,
+            'DAA':None,
+            'INR':self.__inr,
+            'INX':self.__inx,
+            'DCR':self.__dcr,
+            'DCX':self.__dcx,
         }
 
         self.__param_rule = {
@@ -44,22 +51,22 @@ class Simulator:
             'STAX':(1,1),
             'LHLD':(1,5),
             'SHLD':(1,5),
-            'XCHG':(0,1),
+            'XCHG':(0,0),
             'IN':(1,3),
             'OUT':(1,3),
             'ADD':(1,1),
             'ADI':(1,3),
-            'ADC':None,
+            'ADC':(1,1),
             'SUB':(1,1),
             'SUI':(1,3),
-            'SBB':None,
-            'SBI':None,
-            'INR':None,
-            'DCR':None,
-            'INX':None,
-            'DCX':None,
-            'DAD':None,
-            'DAA':None
+            'SBB':(1,1),
+            'SBI':(1,3),
+            'INR':(1,1),
+            'DCR':(1,1),
+            'INX':(1,1),
+            'DCX':(1,1),
+            'DAD':(1,1),
+            'DAA':None,
         }
     
     def op_code(self,code:str):
@@ -90,18 +97,33 @@ class Simulator:
     def show_port(self):
         return self.__port
 
+    def check_pointer(self,rp:str) -> bool:
+        if rp == 'M': rp = 'H'
+        if len(self.__rp(rp)) != 5 and self.__rp(rp) in self.__port.keys(): return True
+        else: return False
+
+    def __filter(self,arg:str):
+        return int(arg.replace('H',''),16)
+
+    def __encode(self,arg:int):
+        return hex(arg)[2:].upper() + 'H'
+
+    def __rp(self,rp:str = 'H') -> str:
+        if rp == 'B': return self.__registers['B'] + self.__registers['C'] + 'H'
+        elif rp == 'D': return  self.__registers['D'] + self.__registers['E'] + 'H'
+        else: return self.__registers['H'] + self.__registers['L'] + 'H'
+
     def __mov(self,rd:str,rs:str):
         if rd == 'M':
-            self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  rs
+            self.__memory_address[self.__rp()] =  rs
         elif rs == 'M':
-            self.__registers[rd] = self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H']
+            self.__registers[rd] = self.__memory_address[self.__rp()]
         else:
             self.__registers[rd] = self.__registers[rs]
 
     def __mvi(self,r:str,data:str):
         if r == 'M':
-            if self.__registers['H'] + self.__registers['L'] + 'H' in self.__memory_address:
-                self.__memory_address[self.__registers['H'] + self.__registers['L'] + 'H'] =  data
+            self.__memory_address[self.__rp()] =  data
         else:
             self.__registers[r] = data
 
@@ -126,15 +148,15 @@ class Simulator:
 
     def __ldax(self,rp:str):
         if rp == 'B':
-            self.__registers['A'] = self.__memory_address[self.__registers['B'] + self.__registers['C'] + 'H']  
+            self.__registers['A'] = self.__memory_address[self.__rp('C')]  
         elif rp == 'D':
-            self.__registers['A'] = self.__memory_address[self.__registers['D'] + self.__registers['E'] + 'H']
+            self.__registers['A'] = self.__memory_address[self.__rp('D')]
     
     def __stax(self,rp:str):
         if rp == 'B':
-            self.__memory_address[self.__registers['B'] + self.__registers['C'] + 'H'] = self.__registers['A'] 
+            self.__memory_address[self.__rp('C')] = self.__registers['A'] 
         elif rp == 'D':
-                self.__memory_address[self.__registers['D'] + self.__registers['E'] + 'H'] = self.__registers['A']
+                self.__memory_address[self.__rp('D')] = self.__registers['A']
 
     def __lhld(self,ma:str):
         self.__registers['L'] = self.__memory_address[ma]
@@ -155,13 +177,58 @@ class Simulator:
         self.__port[port] = self.__registers['A']
     
     def __add(self,r:str):
-        self.__registers['A'] = hex(int(self.__registers['A'].replace('H',''),16) +  int(self.__registers[r].replace('H',''),16))[2:].upper() + 'H'
+        if r == 'M':
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__memory_address[self.__rp()]) )
+        else: 
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__registers[r]) )
+
+    def __adc(self,r:str):
+        if r == 'M':
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__memory_address[self.__rp()]) + self.__flags['C'] )
+        else:
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) + self.__filter(self.__registers[r]) + self.__flags['C'] )
 
     def __adi(self,data:str):
-        self.__registers['A'] = hex(int(self.__registers['A'].replace('H',''),16) +  int(data.replace('H',''),16))[2:].upper() + 'H'
+        self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) +  self.__filter(data))
+    
+    def __dad(self,rp:str):
+        self.__memory_address[self.__rp()] = self.__encode(self.__filter(self.__memory_address[self.__rp()]) +  self.__filter(self.__memory_address[self.__rp(rp)])) 
 
     def __sub(self,r:str):
-        self.__registers['A'] = hex( abs(int(self.__registers['A'].replace('H',''),16) -  int(self.__registers[r].replace('H',''),16)) )[2:].upper() + 'H'
+        if r == 'M':
+            self.__registers['A'] = self.__encode( abs(self.__filter(self.__registers['A']) -  self.__filter(self.__memory_address[self.__rp()])) )
+        else:
+            self.__registers['A'] = self.__encode( abs(self.__filter(self.__registers['A']) -  self.__filter(self.__registers[r])) )
+    
+    def __sbb(self,r:str):
+        if r == 'M':
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) - ( self.__filter(self.__memory_address[self.__rp()]) + self.__flags['C'] ) )
+        else:
+            self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) - ( self.__filter(self.__registers[r]) + self.__flags['C'] ) )
     
     def __sui(self,data:str):
-        self.__registers['A'] = hex(abs(int(self.__registers['A'].replace('H',''),16) -  int(data.replace('H',''),16)))[2:].upper() + 'H'
+        self.__registers['A'] = self.__encode(abs(self.__filter(self.__registers['A']) -  self.__filter(data)))
+    
+    def __sbi(self,data:str):
+        rawDat = self.__filter(data)
+        idat = ((~rawDat + 1) & ((1 << len( bin(rawDat)[2:]) ) - 1)) #2's complement
+        self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) - ( idat + self.__flags['C'] ))
+    
+    def __inr(self,r:str):
+        if r == 'M':
+            self.__lxi('H',self.__encode(self.__filter(self.__rp().replace('H','')) + 1)) 
+        else:
+            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) + 1 ) 
+    
+    def __inx(self,rp:str):
+        self.__memory_address[self.__rp(rp)] = self.__encode(self.__filter(self.__memory_address[self.__rp(rp)]) + 1) 
+    
+    def __dcx(self,rp:str):
+        self.__memory_address[self.__rp(rp)] = self.__encode(self.__filter( self.__memory_address[self.__rp(rp)] ) - 1 ) 
+    
+    def __dcr(self,r:str):
+        if r == 'M':
+            self.__lxi('H',self.__encode(self.__filter(self.__rp().replace('H','')) - 1)) 
+        else:
+            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) - 1 ) 
+    
