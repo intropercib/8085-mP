@@ -1,5 +1,3 @@
-from prettytable import PrettyTable
-
 class Simulator:
     def __init__(self):
         self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
@@ -68,6 +66,43 @@ class Simulator:
             'DAD':(1,1),
             'DAA':None,
         }
+        
+    def check_param(self,inst:str,arg:str):
+        prompt = arg.upper().replace(' ', '').split(',')
+        check_list = self.param()
+
+        if check_list[inst][0] == 0:
+            if len(prompt[0]) >= 1: return 'SyntaxError'
+
+        elif check_list[inst][0] == 1:
+
+            if len(prompt[0]) != check_list[inst][1]: return 'SyntaxError'
+            elif len(prompt[0]) == 0: return 'TypeError'
+            elif len(prompt[0]) == 1 and prompt[0] not in self.show_register().keys(): return 'RegisterError'
+            elif len(prompt[0]) == 5 and prompt[0] not in self.show_memory().keys(): return 'MemoryError'
+            elif len(prompt[0]) == 3 and prompt[0] not in self.show_port().keys(): return 'DataError'
+            else: return prompt
+
+        else:
+            if arg.find(',') == -1: return 'CommaError' 
+            elif any([len(prompt[0]) != check_list[inst][1],
+                  len(prompt[1]) != check_list[inst][2]]): return 'SyntaxError'
+            elif len(prompt[0]) == 0 or len(prompt[1]) == 0: return 'TypeError'
+            else:
+                if any([len(prompt[0]) == 1  and prompt[0] == 'M' and self.check_pointer(prompt[0]),
+                        len(prompt[1]) == 1 and prompt[1] == 'M' and self.check_pointer(prompt[0])]
+                ): return 'PointerError'
+
+                if any(
+                    [len(prompt[0]) == 1 and prompt[0] not in self.show_register().keys(),
+                     len(prompt[1]) == 1 and prompt[1] not in self.show_register().keys()]
+                ): return 'RegisterError'
+                elif any(
+                    [len(prompt[0]) == 5 and prompt[0] not in self.show_memory().keys(),
+                     len(prompt[1]) == 5 and prompt[1] not in self.show_memory().keys()]
+                ): return 'MemoryError'
+                elif len(prompt[1]) == 3 and prompt[1] not in self.show_port().keys(): return 'DataError'
+                else: return prompt
     
     def op_code(self,code:str):
         return self.__op_code[code]
@@ -96,6 +131,9 @@ class Simulator:
     
     def show_port(self):
         return self.__port
+    
+    def show_op_code(self):
+        return [i for i in self.__op_code]
 
     def check_pointer(self,rp:str) -> bool:
         if rp == 'M': rp = 'H'
