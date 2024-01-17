@@ -19,6 +19,9 @@ class Interface(Cmd):
     def __init__(self):
         super().__init__()
         self.mP = Simulator()
+        if os.name == 'nt': os.system('CLS')
+        elif os.name == 'posix': os.system('clear')
+
         self.error_msg = {
             'CommaError':lambda:print('Error: , missing'),
             'SyntaxError': lambda arg,syntax: print(f'Invalid Syntax: {arg}. Should be {syntax}.'),
@@ -32,9 +35,6 @@ class Interface(Cmd):
             'MemoryError':lambda memory:print(f'MemoryError: {memory} should be a valid 16-bit memory address.'),
             'PortError':lambda port:print(f'PortError: {port} should be a vaild 8-bit port address.')
         }
-        if os.name == 'nt': os.system('CLS')
-        elif os.name == 'posix': os.system('clear')
-
 
     def default(self,line):
         print(f"Unknown command: {line}.\nType 'help' for a list of commands.")
@@ -42,44 +42,6 @@ class Interface(Cmd):
     def do_quit(self, arg):
         "Quits your program"
         return True
-
-
-    def check_param(self,inst:str,arg:str):
-        prompt = arg.upper().replace(' ', '').split(',')
-        check_list = self.mP.param()
-
-        if check_list[inst][0] == 0:
-            if len(prompt[0]) >= 1: return 'SyntaxError'
-
-        elif check_list[inst][0] == 1:
-
-            if len(prompt[0]) != check_list[inst][1]: return 'SyntaxError'
-            elif len(prompt[0]) == 0: return 'TypeError'
-            elif len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(): return 'RegisterError'
-            elif len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(): return 'MemoryError'
-            elif len(prompt[0]) == 3 and prompt[0] not in self.mP.show_port().keys(): return 'DataError'
-            else: return prompt
-
-        else:
-            if arg.find(',') == -1: return 'CommaError' 
-            elif any([len(prompt[0]) != check_list[inst][1],
-                  len(prompt[1]) != check_list[inst][2]]): return 'SyntaxError'
-            elif len(prompt[0]) == 0 or len(prompt[1]) == 0: return 'TypeError'
-            else:
-                if any([len(prompt[0]) == 1  and prompt[0] == 'M' and self.mP.check_pointer(prompt[0]),
-                        len(prompt[1]) == 1 and prompt[1] == 'M' and self.mP.check_pointer(prompt[0])]
-                ): return 'PointerError'
-
-                if any(
-                    [len(prompt[0]) == 1 and prompt[0] not in self.mP.show_register().keys(),
-                     len(prompt[1]) == 1 and prompt[1] not in self.mP.show_register().keys()]
-                ): return 'RegisterError'
-                elif any(
-                    [len(prompt[0]) == 5 and prompt[0] not in self.mP.show_memory().keys(),
-                     len(prompt[1]) == 5 and prompt[1] not in self.mP.show_memory().keys()]
-                ): return 'MemoryError'
-                elif len(prompt[1]) == 3 and prompt[1] not in self.mP.show_port().keys(): return 'DataError'
-                else: return prompt
 
     def do_MOV(self, arg:str):
         """
@@ -98,13 +60,13 @@ class Interface(Cmd):
         Example:
             > MOV A,B
         """
-        status = self.check_param('MOV',arg)
+        status = self.mP.check_param('MOV',arg)
 
         if status == 'CommaError': self.error_msg[status]()
         elif status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status]('MOV ' + arg,'MOV rd,rs')
         elif status == 'RegisterError': self.error_msg[status]('rd/rs')
-        elif status == 'PointerError':self.error_msg[status]('M')
+        elif status == 'PointerError': self.error_msg[status]('M')
         else:
             rd,rs = status
             self.mP.op_code('MOV')(rd,rs)
@@ -130,13 +92,13 @@ class Interface(Cmd):
             > MVI A, 42
             Moves the immediate value 42 into register A.
         """
-        status = self.check_param('MVI',arg)
-        if status == 'CommaError':self.error_msg[status]()
+        status = self.mP.check_param('MVI',arg)
+        if status == 'CommaError': self.error_msg[status]()
         elif status == 'TypeError': self.error_msg[status]()
-        elif status == 'SyntaxError':self.error_msg[status](f'MVI {arg}','MVI r,data (8-bit)')
+        elif status == 'SyntaxError': self.error_msg[status](f'MVI {arg}','MVI r,data (8-bit)')
         elif status == 'RegisterError': self.error_msg[status]('r')
         elif status == 'DataError': self.error_msg[status]('data') 
-        elif status == 'PointerError':self.error_msg[status]('M')
+        elif status == 'PointerError': self.error_msg[status]('M')
         else:
             r,data = status
             self.mP.op_code('MVI')(r,data)
@@ -163,7 +125,7 @@ class Interface(Cmd):
             > LXI H, 2000H
             Loads the immediate 16-bit hexadecimal value 2000H into register pair H-L.
         """
-        status = self.check_param('LXI',arg)
+        status = self.mP.check_param('LXI',arg)
         if status == 'CommaError': self.error_msg[status]()
         elif status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](f'LXI {arg}','LXI rp,memory address')
@@ -188,10 +150,10 @@ class Interface(Cmd):
             > LDA 2000H
             Loads the accumulator with the contents stored at the memory address 2000H.
         """
-        status = self.check_param('LDA',arg)
+        status = self.mP.check_param('LDA',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'LDA 16-bit memory address')
-        elif status == 'MemoryError':self.error_msg[status](arg)
+        elif status == 'MemoryError': self.error_msg[status](arg)
         else:
             self.mP.op_code('LDA')(status[0])
 
@@ -210,10 +172,10 @@ class Interface(Cmd):
             > STA 2000H
             Stores the contents of the accumulator into the memory address 2000H.
         """
-        status = self.check_param('STA',arg)
+        status = self.mP.check_param('STA',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'STA 16-bit memory address')
-        elif status == 'MemoryError':self.error_msg[status](arg)
+        elif status == 'MemoryError': self.error_msg[status](arg)
         else:
             self.mP.op_code('STA')(status[0])
 
@@ -232,7 +194,7 @@ class Interface(Cmd):
             > LDAX B
             Loads the accumulator with the contents of the memory location specified by the register pair B.
         """
-        status = self.check_param('LDAX',arg)
+        status = self.mP.check_param('LDAX',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'LDAX register pair (rp)')
         elif status == 'RegisterError' or arg.replace(' ','').split(',')[0] in ['A','M','F']: self.error_msg['RpError'](arg)
@@ -254,7 +216,7 @@ class Interface(Cmd):
             > STAX D
             Stores the contents of the accumulator into the memory location specified by the register pair D.
         """
-        status = self.check_param('STAX',arg)
+        status = self.mP.check_param('STAX',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'STAX register pair (rp)')
         elif status == 'RegisterError' or arg.replace(' ','').split(',')[0] in ['A','M','F']: self.error_msg['RpError'](arg)
@@ -274,7 +236,7 @@ class Interface(Cmd):
         Example:
             > LHLD 2000H
         """
-        status = self.check_param('LHLD',arg)
+        status = self.mP.check_param('LHLD',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'LHLD 16 bit memory location (hex)')
         elif status == 'MemoryError': self.error_msg[status](arg)
@@ -294,7 +256,7 @@ class Interface(Cmd):
         Example:
             > SHLD 2000H
         """
-        status = self.check_param('SHLD',arg)
+        status = self.mP.check_param('SHLD',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'SHLD 16 bit memory location (hex)')
         elif status == 'MemoryError': self.error_msg[status](arg)
@@ -314,7 +276,7 @@ class Interface(Cmd):
         Example:
             > IN 10H
         """
-        status = self.check_param('IN',arg)
+        status = self.mP.check_param('IN',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'IN 8 bit port location')
         elif status == 'DataError': self.error_msg['PortError'](arg)
@@ -334,7 +296,7 @@ class Interface(Cmd):
         Example:
             > OUT 20H
         """
-        status = self.check_param('OUT',arg)
+        status = self.mP.check_param('OUT',arg)
         if status == 'TypeError': self.error_msg[status]()
         elif status == 'SyntaxError': self.error_msg[status](arg,'OUT 8 bit port location')
         elif status == 'DataError': self.error_msg['PortError'](arg)
@@ -356,7 +318,7 @@ class Interface(Cmd):
             DE and HL register pairs after XCHG:
             DE: 12F6   HL: AB78
         """
-        status = self.check_param('XCHG',arg)
+        status = self.mP.check_param('XCHG',arg)
         if status == 'SyntaxError': self.error_msg[status](arg,"XCHG takes no argument")
         elif self.mP.check_pointer('D') or self.mP.check_pointer('H'): self.error_msg['PointerError']('Either H or D')
         else:
@@ -376,10 +338,9 @@ class Interface(Cmd):
         Example:
             > ADD B
         """
-        status = self.check_param('ADD',arg)
+        status = self.mP.check_param('ADD',arg)
         if status == 'SyntaxError': self.error_msg[status](arg,'ADD r/m')
         elif status == 'RegisterError': self.error_msg[status](arg,'ADD r/m')
-        elif self.mP.check_pointer('H'): self.error_msg['PointerError'](arg)
         else:
             print(status)
             self.mP.op_code('ADD')(status[0])
@@ -400,14 +361,14 @@ class Interface(Cmd):
             > ADC A       # Adds the content of register A along with carry to register A
             > ADC M       # Adds the content of memory pointed to by HL along with carry to register A
         """
-        status = self.check_param('ADC', arg)
+        status = self.mP.check_param('ADC', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status]('ADC ' + arg, 'ADC r')
+         self.error_msg[status]('ADC ' + arg, 'ADC r')
         elif status == 'RegisterError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         else:
             self.mP.op_code('ADC')(status[0])
 
@@ -428,14 +389,14 @@ class Interface(Cmd):
             > ADI 42H
             Adds the immediate value 42 to the accumulator.
         """
-        status = self.check_param('ADI', arg)
+        status = self.mP.check_param('ADI', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'ADI 8-bit data')
+         self.error_msg[status](arg, 'ADI 8-bit data')
         elif status == 'DataError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         else:
             self.mP.op_code('ADI')(status)
 
@@ -456,16 +417,16 @@ class Interface(Cmd):
             > DAD B
             Adds the contents of register pair B-C to register pair H-L.
         """
-        status = self.check_param('DAD', arg)
+        status = self.mP.check_param('DAD', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'DAD Rp')
+         self.error_msg[status](arg, 'DAD Rp')
         elif status == 'RegisterError' or arg[0] in ['A','H','M','F']:
-            self.error_msg['RpError'](arg)
+         self.error_msg['RpError'](arg)
         elif self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg[0])
+         self.error_msg['PointerError'](arg[0])
         else:
             self.mP.op_code('DAD')(status[0])
 
@@ -488,16 +449,16 @@ class Interface(Cmd):
             > SUB M
             Subtracts the content of memory pointed to by HL from the accumulator.
         """
-        status = self.check_param('SUB', arg)
+        status = self.mP.check_param('SUB', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'SUB rd or SUB M')
+         self.error_msg[status](arg, 'SUB r/m')
         elif status == 'RegisterError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         elif self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg[0])
+         self.error_msg['PointerError'](arg[0])
         else:
             self.mP.op_code('SUB')(status)
 
@@ -518,14 +479,14 @@ class Interface(Cmd):
             > SUI 42H
             Subtracts the immediate value 42 from the accumulator.
         """
-        status = self.check_param('SUI', arg)
+        status = self.mP.check_param('SUI', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'SUI 8-bit data (hex)')
+         self.error_msg[status](arg, 'SUI 8-bit data (hex)')
         elif status == 'DataError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         else:
             self.mP.op_code('SUI')(status[0])
     
@@ -546,14 +507,14 @@ class Interface(Cmd):
             > SBI 42H
             Subtracts the immediate value 42 along with the carry from the accumulator.
         """
-        status = self.check_param('SBI', arg)
+        status = self.mP.check_param('SBI', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'SBI 8-bit data (hex)')
+         self.error_msg[status](arg, 'SBI 8-bit data (hex)')
         elif status == 'DataError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         else:
             self.mP.op_code('SBI')(status[0])
 
@@ -576,16 +537,16 @@ class Interface(Cmd):
             > SBB M
             Subtracts the content of memory pointed to by HL along with the borrow from the accumulator.
         """
-        status = self.check_param('SBB', arg)
+        status = self.mP.check_param('SBB', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'SBB r or SBB M')
+         self.error_msg[status](arg, 'SBB r/m')
         elif status == 'RegisterError':
-            self.error_msg[status](arg)
+         self.error_msg[status](arg)
         elif arg[0] == 'M' and self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg) 
+         self.error_msg['PointerError'](arg) 
         else:
             self.mP.op_code('SBB')(status[0])
 
@@ -608,16 +569,16 @@ class Interface(Cmd):
             > INR M
             Increments the content of memory pointed to by HL.
         """
-        status = self.check_param('INR', arg)
+        status = self.mP.check_param('INR', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'INR rd or INR M')
+         self.error_msg[status](arg, 'INR r/m')
         elif status == 'RegisterError':
-            self.error_msg[status](arg)
-        elif arg[0] == 'M' and self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg) 
+         self.error_msg[status](arg)
+        elif self.mP.check_pointer(arg[0]):
+         self.error_msg['PointerError'](arg) 
         else:
             self.mP.op_code('INR')(status[0])
 
@@ -638,16 +599,16 @@ class Interface(Cmd):
             > INX B
             Increments the register pair B-C.
         """
-        status = self.check_param('INX', arg)
+        status = self.mP.check_param('INX', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'INX Rp')
+         self.error_msg[status](arg, 'INX Rp')
         elif status == 'RegisterError' or arg[0] in ['A','M','F']:
-            self.error_msg['RpError'](arg)
+         self.error_msg['RpError'](arg)
         elif self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg)
+         self.error_msg['PointerError'](arg)
         else:
             self.mP.op_code('INX')(status[0])
 
@@ -668,16 +629,16 @@ class Interface(Cmd):
             > DCX B
             Decrements the register pair B-C.
         """
-        status = self.check_param('DCX', arg)
+        status = self.mP.check_param('DCX', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'DCX Rp')
+         self.error_msg[status](arg, 'DCX Rp')
         elif status == 'RegisterError' or arg[0] in ['A','M','F']:
-            self.error_msg['RpError'](arg)
+         self.error_msg['RpError'](arg)
         elif self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg)
+         self.error_msg['PointerError'](arg)
         else:
             self.mP.op_code('DCX')(status)
     
@@ -700,16 +661,16 @@ class Interface(Cmd):
             > DCR M
             Decrements the content of memory pointed to by HL.
         """
-        status = self.check_param('DCR', arg)
+        status = self.mP.check_param('DCR', arg)
 
         if status == 'TypeError':
-            self.error_msg[status]()
+         self.error_msg[status]()
         elif status == 'SyntaxError':
-            self.error_msg[status](arg, 'DCR rd or DCR M')
+         self.error_msg[status](arg, 'DCR rd or DCR M')
         elif status == 'RegisterError':
-            self.error_msg[status](arg)
-        elif arg[0] == 'M' and self.mP.check_pointer(arg[0]):
-            self.error_msg['PointerError'](arg)
+         self.error_msg[status](arg)
+        elif self.mP.check_pointer(arg[0]):
+         self.error_msg['PointerError'](arg)
         else:
             self.mP.op_code('DCR')(status)
 
