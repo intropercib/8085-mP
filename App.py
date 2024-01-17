@@ -14,7 +14,20 @@ __- By Sakar Giri (KAN079BEI016)__""")
 
 class App(Simulator):
     def __init__(self):
-        super().__init__()
+
+        if "memory" not in st.session_state:
+            st.session_state.memory = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
+        if "register" not in st.session_state:
+            st.session_state.register = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
+        if "flag" not in st.session_state:
+            st.session_state.flag = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
+        if "port" not in st.session_state:
+            st.session_state.port = {}
+        for i in range(256):
+            if len(hex(i)[2:]) == 1 :st.session_state.port['0' + hex(i)[2:].upper() + 'H'] = '0'
+            else: st.session_state.port[hex(i)[2:].upper() + 'H'] = '0'
+
+        super().__init__(st.session_state.memory, st.session_state.register,st.session_state.flag,st.session_state.port)
         self.error_msg = {
             'CommaError':lambda:[st.chat_message("assistant").write('Error: , missing'),
                 self.history('assistant','Error: , missing')],
@@ -111,12 +124,6 @@ class App(Simulator):
                 'SyntaxError':'DCX Rp'
             }
         }
-        if "register" not in st.session_state:
-            st.session_state.register = self.show_register()
-        if "memory" not in st.session_state:
-            st.session_state.memory = self.show_memory()
-        if "flag" not in st.session_state:
-            st.session_state.flag = self.show_flag()
 
         self.display()
 
@@ -158,33 +165,52 @@ class App(Simulator):
                     self.op_code(inst)()
                 else:
                     self.op_code(inst)(status[0])
-                
-                st.session_state.register = self.show_register()
-                st.session_state.memory = self.show_memory()
-                st.session_state.flag = self.show_flag()
 
-        elif prompt_chunk[0] == 'exam:memory':
-            memory_list = ''.join(prompt_chunk[1:])
-            memory_table = PrettyTable(['Memory Address', 'Content'])
-            try:
-                for i in memory_list.split(','):
-                    memory_table.add_row([i.upper(),st.session_state["memory"][i.upper()]])
+        elif prompt_chunk[0] == 'exam':
+            if prompt_chunk[1] == 'memory': 
+                memory_list = ''.join(prompt_chunk[2:])
+                memory_table = PrettyTable(['Memory Address', 'Content'])
+                try:
+                    for i in memory_list.split(','):
+                        memory_table.add_row([i.upper(),st.session_state.memory[i.upper()]])
 
-            except KeyError:
-                st.chat_message('assistant').write('Error: TypeError: Parameter not fulfilled.')
-                self.history('assistant','TypeError: Parameter not fulfilled.')
+                except KeyError:
+                    st.chat_message('assistant').write('Error: TypeError: Parameter not fulfilled. Should be exam memory (memory address, ...)')
+                    self.history('assistant','TypeError: Parameter not fulfilled. Should be exam memory (memory address, ...)')
 
-            else:
-                st.chat_message('assistant').write(memory_table)
-                self.history('assistant',memory_table)
+                else:
+                    st.chat_message('assistant').write(memory_table)
+                    self.history('assistant',memory_table)
 
-        elif prompt_chunk[0] == 'exam:register':
-            register_table = PrettyTable(['Register', 'Content'])
-            for i in self.show_register():
-                if i != 'M' and i != 'F':
-                    register_table.add_row([i,st.session_state["register"][i]])
-            st.chat_message('assistant').write(register_table)
-            self.history('assistant',register_table)
+            elif prompt_chunk[1] == 'register':
+                register_table = PrettyTable(['Register', 'Content'])
+                for i in self.show_register():
+                    if i != 'M' and i != 'F':
+                        register_table.add_row([i,st.session_state.register[i]])
+                st.chat_message('assistant').write(register_table)
+                self.history('assistant',register_table)
+            
+            elif prompt_chunk[1] == 'flag':
+                flag_table = PrettyTable(['Flag', 'Content'])
+                for i in self.show_flag():
+                    flag_table.add_row([i,st.session_state.flag[i]])
+                st.chat_message('assistant').write(flag_table)
+                self.history('assistant',flag_table)
+            
+            elif prompt_chunk[1] == 'port':
+                port_list = ''.join(prompt_chunk[2:])
+                port_table = PrettyTable(['Port Address', 'Content'])
+                try:
+                    for i in port_list.split(','):
+                        port_table.add_row([i.upper(),st.session_state.port[i.upper()]])
+
+                except KeyError:
+                    st.chat_message('assistant').write('Error: TypeError: Parameter not fulfilled. Should be exam memory (port address, ...)')
+                    self.history('assistant','TypeError: Parameter not fulfilled. Should be exam memory (port address, ...)')
+
+                else:
+                    st.chat_message('assistant').write(port_table)
+                    self.history('assistant',port_table)
 
         else:
             st.chat_message("assistant").write(f"Unknown command: {prompt}.\nType 'help' for a list of commands.")

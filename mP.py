@@ -1,12 +1,9 @@
 class Simulator:
-    def __init__(self):
-        self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
-        self.__port = {}
-        for i in range(256):
-            if len(hex(i)[2:]) == 1 :self.__port['0' + hex(i)[2:].upper() + 'H'] = '0'
-            else: self.__port[hex(i)[2:].upper() + 'H'] = '0'
-        self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
-        self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
+    def __init__(self,memory,register,flag,port):
+        self.__memory_address:dict = memory
+        self.__registers:dict = register
+        self.__flags:dict = flag
+        self.__port:dict = port
         self.__op_code = {
             'MOV':self.__mov,
             'MVI':self.__mvi,
@@ -153,7 +150,7 @@ class Simulator:
 
     def __mov(self,rd:str,rs:str):
         if rd == 'M':
-            self.__memory_address[self.__rp()] =  rs
+            self.__memory_address[self.__rp()] =  self.__registers[rs]
         elif rs == 'M':
             self.__registers[rd] = self.__memory_address[self.__rp()]
         else:
@@ -217,7 +214,7 @@ class Simulator:
     def __add(self,r:str):
         if r == 'M':
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__memory_address[self.__rp()]) )
-        else: 
+        else:
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__registers[r]) )
 
     def __adc(self,r:str):
