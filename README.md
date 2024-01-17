@@ -42,7 +42,7 @@ After launching the simulator app, you will be greeted with an introduction and 
 
 Enter 8085 microprocessor instructions in the provided chat input box to execute various operations. For example:
 <!-- picture -->
-___Explore the state of the microprocessor using interactive commands available in the chat-like interface.__
+__Explore the state of the microprocessor using interactive commands available in the chat-like interface.__
 
 ### Note
 As of now, not all instructions are available, and updates are constantly being made. Instructions up to arithmetic operations are supported.
