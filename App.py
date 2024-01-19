@@ -1,6 +1,7 @@
 import streamlit as st
 from prettytable import PrettyTable
 from mP import Simulator
+from Ai import generate
 
 st.set_page_config(page_title="8085 Simulator",page_icon="icon.png")
 st.title('Welcome to 8085 Simulator')
@@ -211,6 +212,12 @@ class App(Simulator):
                 else:
                     st.chat_message('assistant').write(port_table)
                     self.history('assistant',port_table)
+
+        elif prompt_chunk[0] == "@ask":
+            response:str = generate(' '.join(prompt_chunk[1:]))
+            print(response)   
+            st.chat_message("assistant").write(response)
+            self.history("assistant",response)
 
         else:
             st.chat_message("assistant").write(f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
