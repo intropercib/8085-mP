@@ -148,6 +148,11 @@ class Simulator:
         elif rp == 'D': return  self.__registers['D'] + self.__registers['E'] + 'H'
         else: return self.__registers['H'] + self.__registers['L'] + 'H'
 
+    def __check_carry(self):
+        if len(self.__registers['A']) > 3:
+            self.__registers['A'] = self.__registers['A'][1:]
+            self.__flags['C'] = 1  
+
     def __mov(self,rd:str,rs:str):
         if rd == 'M':
             self.__memory_address[self.__rp()] =  self.__registers[rs]
@@ -216,6 +221,7 @@ class Simulator:
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__memory_address[self.__rp()]) )
         else:
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__registers[r]) )
+        self.__check_carry()
 
     def __adc(self,r:str):
         if r == 'M':
@@ -265,5 +271,4 @@ class Simulator:
         if r == 'M':
             self.__lxi('H',self.__encode(self.__filter(self.__rp().replace('H','')) - 1)) 
         else:
-            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) - 1 ) 
-    
+            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) - 1 )
