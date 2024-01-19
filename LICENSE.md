@@ -1,4 +1,4 @@
-8085 Microprocessor Simulator License (Non-Commercial)
+## 8085 Microprocessor Simulator License (Non-Commercial)
 
 The 8085 Microprocessor Simulator is an open-source project aimed at providing a simulation of the 8085 microprocessor. By using, contributing, or distributing this software, you agree to the terms and conditions of the following license:
 
