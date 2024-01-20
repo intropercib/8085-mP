@@ -215,7 +215,6 @@ class App(Simulator):
 
         elif prompt_chunk[0] == "@ask":
             response:str = generate(' '.join(prompt_chunk[1:]))
-            print(response)   
             st.chat_message("assistant").write(response)
             self.history("assistant",response)
 
