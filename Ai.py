@@ -18,5 +18,9 @@ def generate(prompt:str):
         "__Secure-1PSIDTS":api["TSID"],
         "__Secure-1PSIDCC":api["CCID"],
     }
-    bard = BardCookies(cookie_dict=cookie_dict)
-    return bard.get_answer(f"{api['pre-prompt']} {prompt}")['content']
+    try:
+        bard = BardCookies(cookie_dict=cookie_dict)
+    except Exception:
+        return "API key needs to be reinitiallized. Please wait untill the keys are set accordingly."
+    else:
+        return bard.get_answer(f"{api['pre-prompt']} \"{prompt.upper()}\"")['content']
