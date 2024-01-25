@@ -9,9 +9,7 @@ st.markdown("""
 This simulator allows you to interact with an emulated 8085 microprocessor.
 Type 'help' for a list of available commands or 'help <command>' for detailed information.
 
-Get started by entering commands such as 'MOV A, B' or 'LXI H, 2000H'.
-
-__- By Sakar Giri (KAN079BEI016)__""")
+Get started by entering commands such as 'MOV A, B' or 'LXI H, 2000H'.""")
 
 class App(Simulator):
     def __init__(self):
