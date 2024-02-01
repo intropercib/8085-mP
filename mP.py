@@ -1,9 +1,12 @@
 class Simulator:
-    def __init__(self,memory,register,flag,port):
-        self.__memory_address:dict = memory
-        self.__registers:dict = register
-        self.__flags:dict = flag
-        self.__port:dict = port
+    def __init__(self):
+        self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
+        self.__port = {}
+        for i in range(256):
+            if len(hex(i)[2:]) == 1 :self.__port['0' + hex(i)[2:].upper() + 'H'] = '0'
+            else: self.__port[hex(i)[2:].upper() + 'H'] = '0'
+        self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
+        self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
         self.__op_code = {
             'MOV':self.__mov,
             'MVI':self.__mvi,
@@ -34,6 +37,21 @@ class Simulator:
             'INX':self.__inx,
             'DCR':self.__dcr,
             'DCX':self.__dcx,
+            'RRC':self.__rrc,
+            'RAR':self.__rar,
+            'RLC':self.__rlc,
+            'RAL':self.__ral,
+            'ANI':self.__ani,
+            'XRI':self.__xri,
+            'ORI':self.__ori,
+            'ANA':self.__ana,
+            'ORA':self.__ora,
+            'XRA':self.__xra,
+            'CMA':self.__cma,
+            'CPI':self.__cpi,
+            'CMC':self.__cmc,
+            'STC':self.__stc
+            
         }
 
         self.__param_rule = {
@@ -62,6 +80,20 @@ class Simulator:
             'DCX':(1,1),
             'DAD':(1,1),
             'DAA':None,
+            'RRC':(0,0),
+            'RAR':(0,0),
+            'RLC':(0,0),
+            'RAL':(0,0),
+            'ANI':(1,3),
+            'XRI':(1,3),
+            'ORI':(1,3),
+            'ANA':(1,1),
+            'ORA':(1,1),
+            'XRA':(1,1),
+            'CMA':(0,0),
+            'CPI':(1,3),
+            'CMC':(0,0),
+            'STC':(0,0)
         }
         
     def check_param(self,inst:str,arg:str):
@@ -137,21 +169,21 @@ class Simulator:
         if len(self.__rp(rp)) != 5 and self.__rp(rp) in self.__port.keys(): return True
         else: return False
 
-    def __filter(self,arg:str):
-        return int(arg.replace('H',''),16)
+    def __filter(self,arg:str, conversion:int = 16):
+        return int(arg.replace('H',''),conversion)
 
-    def __encode(self,arg:int):
-        return hex(arg)[2:].upper() + 'H'
+    def __encode(self,arg:int | bool, flag:str = 'hex'):
+        if flag == 'bin':
+            return bin(arg)
+        elif flag == 'bool':
+            return int(arg)
+        elif flag == 'hex':
+            return hex(arg)[2:].upper() + 'H'
 
     def __rp(self,rp:str = 'H') -> str:
         if rp == 'B': return self.__registers['B'] + self.__registers['C'] + 'H'
         elif rp == 'D': return  self.__registers['D'] + self.__registers['E'] + 'H'
         else: return self.__registers['H'] + self.__registers['L'] + 'H'
-
-    def __check_carry(self):
-        if len(self.__registers['A']) > 3:
-            self.__registers['A'] = self.__registers['A'][1:]
-            self.__flags['C'] = 1  
 
     def __mov(self,rd:str,rs:str):
         if rd == 'M':
@@ -219,9 +251,8 @@ class Simulator:
     def __add(self,r:str):
         if r == 'M':
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__memory_address[self.__rp()]) )
-        else:
+        else: 
             self.__registers['A'] = self.__encode( self.__filter(self.__registers['A']) +  self.__filter(self.__registers[r]) )
-        self.__check_carry()
 
     def __adc(self,r:str):
         if r == 'M':
@@ -271,4 +302,80 @@ class Simulator:
         if r == 'M':
             self.__lxi('H',self.__encode(self.__filter(self.__rp().replace('H','')) - 1)) 
         else:
-            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) - 1 )
+            self.__registers[r] = self.__encode( self.__filter(self.__registers[r]) - 1 ) 
+            
+    def __rrc(self):
+        accumulator_value = bin(self.__filter(self.__registers['A']))[2:].zfill(8)
+        self.__flags['C'] = int(accumulator_value[-1])
+        rotated_value = accumulator_value[-1] + accumulator_value[:-1]
+        self.__registers['A'] = self.__encode(int(rotated_value,2))
+        
+    def __rar(self):
+        accumulator_value = bin(self.__filter(self.__registers['A']))[2:].zfill(8)
+        rotated_value = str(self.__flags['C']) + accumulator_value[:-1]
+        self.__flags['C'] = int(accumulator_value[-1])
+        self.__registers['A'] = self.__encode(int(rotated_value,2))
+    
+    def __rlc(self):
+        accumulator_value = self.__encode(self.__filter(self.__registers['A']),'bin')[2:].zfill(8)
+        rotated_value = accumulator_value[1:] + accumulator_value[0]
+        self.__flags['C'] = int(accumulator_value[0])
+        self.__registers['A'] = self.__encode(int(rotated_value,2))
+        
+    def __ral(self):
+        accumulator_value = self.__encode(self.__filter(self.__registers['A']),'bin')[2:].zfill(8)
+        rotated_value = accumulator_value[1:] + str(self.__flags['C'])
+        self.__flags['C'] = self.__filter(accumulator_value[0],2)
+        self.__registers['A'] = self.__encode(self.__filter(rotated_value,2))
+        
+    def __ani(self,data:str):
+        self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) & self.__filter(data)) 
+        self.__flags['C'] , self.__flags['AC'] = 0, 1
+        
+    def __xri(self,data:str):
+        self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) ^ self.__filter(data))
+        self.__flags['C'] , self.__flags['AC'] = 0, 0
+        
+    def __ori(self,data:str):
+        self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) | self.__filter(data))
+        self.__flags['C'] , self.__flags['AC'] = 0, 0
+
+    def __ana(self, r:str):   
+        if r == 'M':
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) & self.__filter(self.__memory_address[self.__rp()]))
+        else:
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) & self.__filter(self.__registers[r]))
+        self.__registers['AC'] , self.__registers['C'] = 1, 0
+        
+    def __ora(self, r:str):   
+        if r == 'M':
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) | self.__filter(self.__memory_address[self.__rp()]))
+        else:
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) | self.__filter(self.__registers[r]))
+        self.__registers['AC'] , self.__registers['C'] = 0, 0  
+        
+    def __xra(self, r:str):   
+        if r == 'M':
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) ^ self.__filter(self.__memory_address[self.__rp()]))
+        else:
+            self.__registers['A'] = self.__encode(self.__filter(self.__registers['A']) ^ self.__filter(self.__registers[r]))
+        self.__registers['AC'] , self.__registers['C'] = 0, 0         
+        
+    def __cma(self):
+        self.__registers['A'] = self.__encode(~self.__filter(self.__registers['A']) & 0xFF)
+    
+    def __cpi(self, data:str):
+        a_value = self.__filter(self.__registers['A'])
+        data_value = self.__filter(data)
+        if a_value < data_value:
+            self.__flags['C'], self.__flags['Z'] = 1, 0
+        elif a_value == data_value:
+            self.__flags['C'], self.__flags['Z'] = 0, 1
+        else:
+            self.__flags['C'], self.__flags['Z'] = 0, 0
+    
+    def __cmc(self):
+        self.__flags['C'] = self.__encode(not self.__flags['C'], 'bool')
+
+    def __stc(self):
+        self.__flags['C'] = 1
