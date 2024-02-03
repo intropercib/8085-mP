@@ -1,12 +1,9 @@
 class Simulator:
-    def __init__(self):
-        self.__memory_address = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
-        self.__port = {}
-        for i in range(256):
-            if len(hex(i)[2:]) == 1 :self.__port['0' + hex(i)[2:].upper() + 'H'] = '0'
-            else: self.__port[hex(i)[2:].upper() + 'H'] = '0'
-        self.__registers = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
-        self.__flags = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
+    def __init__(self,memory,register,flag,port):
+        self.__memory_address:dict = memory
+        self.__registers:dict = register
+        self.__flags:dict = flag
+        self.__port:dict = port
         self.__op_code = {
             'MOV':self.__mov,
             'MVI':self.__mvi,
@@ -166,7 +163,7 @@ class Simulator:
 
     def check_pointer(self,rp:str) -> bool:
         if rp == 'M': rp = 'H'
-        if len(self.__rp(rp)) != 5 and self.__rp(rp) in self.__port.keys(): return True
+        if len(self.__rp(rp)) != 5: return True
         else: return False
 
     def __filter(self,arg:str, conversion:int = 16):
