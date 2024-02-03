@@ -342,7 +342,6 @@ class Interface(Cmd):
         if status == 'SyntaxError': self.error_msg[status](arg,'ADD r/m')
         elif status == 'RegisterError': self.error_msg[status](arg,'ADD r/m')
         else:
-            print(status)
             self.mP.op_code('ADD')(status[0])
     
     def do_ADC(self, arg:str):
