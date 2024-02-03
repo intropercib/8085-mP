@@ -85,15 +85,15 @@ class App(Simulator):
             elif inst in ['LXI','LDAX','STAX','INX','DCX']:
                 if status == 'RegisterError' or param[0] in ['A','M','F']:
                     self.error_msg['RpError'](param[0])
-                elif self.check_pointer(param[0]):
+                elif inst != 'LXI' and  self.check_pointer(param[0]):
                     self.error_msg['PointerError'](param[0])
-            else:
-                if inst in ['MOV','MVI','LXI']:
-                    self.op_code(inst)(status[0],status[1])
-                elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
-                    self.op_code(inst)()
                 else:
-                    self.op_code(inst)(status[0])
+                    if inst in ['MOV','MVI','LXI']:
+                        self.op_code(inst)(status[0],status[1])
+                    elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
+                        self.op_code(inst)()
+                    else:
+                        self.op_code(inst)(status[0])
 
         elif prompt_chunk[0] == 'exam':
             if prompt_chunk[1] == 'memory': 
