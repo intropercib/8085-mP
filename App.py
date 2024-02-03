@@ -1,5 +1,6 @@
 import streamlit as st
 from prettytable import PrettyTable
+from json import load
 from mP import Simulator
 from Ai import Assistant
 
@@ -49,81 +50,8 @@ class App(Simulator):
             'PortError':lambda port:[st.chat_message("assistant").write(f'PortError: {port} should be a vaild 8-bit port address.'),
                 self.history('assistant',f'PortError: {port} should be a vaild 8-bit port address.')]
         }
-        self.specify_msg = {
-            'MOV':{
-                'SyntaxError':'MOV rd,rs',
-            },
-            'MVI':{
-                'SyntaxError':'MVI r,data (8-bit)',
-            },
-            'LXI':{
-                'SyntaxError':'LXI rp,memory address',
-            },
-            'LDA':{
-                'SyntaxError':'LDA 16-bit memory address',
-            },
-            'STA':{
-                'SyntaxError':'STA 16-bit memory address',
-            },
-            'LDAX':{
-                'SyntaxError':'LDAX register pair (rp)',
-            },
-            'STAX':{
-                'SyntaxError':'STAX register pair (rp)',
-            },
-            'LHLD':{
-                'SyntaxError':'LHLD 16 bit memory location (hex)'
-            },
-            'SHLD':{
-                'SyntaxError':'SHLD 16 bit memory location (hex)'
-            },
-            'IN':{
-                'SyntaxError':'IN 8 bit port location',
-            },
-            'OUT':{
-                'SyntaxError':'OUT 8 bit port location',
-            },
-            'XCHG':{
-                'SyntaxError':'XCHG takes no argument',
-            },
-            'ADD':{
-                'SyntaxError':'ADD r/m',
-            },
-            'ADC':{
-                'SyntaxError':'ADC r'
-            },
-            'ADI':{
-                'SyntaxError':'ADI 8-bit data'
-            },
-            'DAD':{
-                'SyntaxError':'DAD Rp'
-            },
-            'SUB':{
-                'SyntaxError':'SUB r/m'
-            },
-            'SUI':{
-                'SyntaxError':'SUI 8-bit data (hex)'
-            },
-            'SBI':{
-                'SyntaxError':'SBI 8-bit data (hex)'
-            },
-            'SBB':{
-                'SyntaxError':'SBB r/m'
-            },
-            'INR':{
-                'SyntaxError':'INR r/m'
-            },
-            'DCR':{
-                'SyntaxError':'DCR r/m'
-            },
-            'INX':{
-                'SyntaxError':'INX Rp'
-            },
-            'DCX':{
-                'SyntaxError':'DCX Rp'
-            }
-        }
-
+        with open("Syntax.json", "r") as errordict:
+            self.specify_msg = load(errordict)
         self.display()
 
     def display(self):
@@ -148,19 +76,21 @@ class App(Simulator):
             inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
             status = self.check_param(inst,param)
             if status == 'CommaError' or status == 'TypeError':self.error_msg[status]()
-            elif status == 'SyntaxError':self.error_msg[status](prompt,self.specify_msg[inst][status])
+            elif status == 'SyntaxError':self.error_msg[status](prompt,self.specify_msg[inst]['Syntax'])
             elif status == 'MemoryError':self.error_msg[status](prompt)
             elif status == 'RegisterError':self.error_msg[status](prompt)
             elif status == 'PortError':self.error_msg[status](prompt)
             elif status == 'DataError':self.error_msg[status](prompt)
             elif status == 'PointerError':self.error_msg[status]('M')
-            elif inst in ['LDAX','STAX'] and self.check_pointer(param[0]): self.error_msg['PointerError'](param[0])
-            elif inst in ['LXI','LDAX','STAX'] and ( status == 'RegisterError' or param[0] in ['A','M','F']):
-                self.error_msg['RpError'](param[0])
+            elif inst in ['LXI','LDAX','STAX','INX','DCX']:
+                if status == 'RegisterError' or param[0] in ['A','M','F']:
+                    self.error_msg['RpError'](param[0])
+                elif self.check_pointer(param[0]):
+                    self.error_msg['PointerError'](param[0])
             else:
                 if inst in ['MOV','MVI','LXI']:
                     self.op_code(inst)(status[0],status[1])
-                elif inst in ['XCHG']:
+                elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
                     self.op_code(inst)()
                 else:
                     self.op_code(inst)(status[0])
