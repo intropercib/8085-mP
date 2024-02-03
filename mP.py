@@ -220,15 +220,19 @@ class Simulator:
 
     def __ldax(self,rp:str):
         if rp == 'B':
-            self.__registers['A'] = self.__memory_address[self.__rp('C')]  
+            self.__registers['A'] = self.__memory_address[self.__rp('B')]
         elif rp == 'D':
             self.__registers['A'] = self.__memory_address[self.__rp('D')]
+        else:
+            self.__registers['A'] = self.__memory_address[self.__rp()]
     
     def __stax(self,rp:str):
         if rp == 'B':
-            self.__memory_address[self.__rp('C')] = self.__registers['A'] 
+            self.__memory_address[self.__rp('B')] = self.__registers['A']
         elif rp == 'D':
-                self.__memory_address[self.__rp('D')] = self.__registers['A']
+            self.__memory_address[self.__rp('D')] = self.__registers['A']
+        else:
+            self.__memory_address[self.__rp()] = self.__registers['A']
 
     def __lhld(self,ma:str):
         self.__registers['L'] = self.__memory_address[ma]
