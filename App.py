@@ -88,12 +88,14 @@ class App(Simulator):
                 elif inst != 'LXI' and  self.check_pointer(param[0]):
                     self.error_msg['PointerError'](param[0])
                 else:
-                    if inst in ['MOV','MVI','LXI']:
-                        self.op_code(inst)(status[0],status[1])
-                    elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
-                        self.op_code(inst)()
-                    else:
-                        self.op_code(inst)(status[0])
+                    pass
+            else:
+                if inst in ['MOV','MVI']:
+                    self.op_code(inst)(status[0],status[1])
+                elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
+                    self.op_code(inst)()
+                else:
+                    self.op_code(inst)(status[0])
 
         elif prompt_chunk[0] == 'exam':
             if prompt_chunk[1] == 'memory': 
