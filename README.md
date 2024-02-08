@@ -47,6 +47,12 @@ Explore the state of the microprocessor using interactive commands available in 
 ### Note
 1. As of now, not all instructions are available, and updates are constantly being made. __Instructions up to logical operations are supported__.
 1. Ensure that you provide valid arguments and follow the correct syntax for each instruction.
+1. __As of now, not all instructions are available (available upto logical operators), and updates are constantly being made. Instructions up to arithmetic operations are supported__.
+2. __None of the flags are effected if any such operations are performed.__
+2. Ensure that you provide valid arguments and follow the correct syntax for each instruction. For additional information on specific commands, use the help command followed by the command name. For example:
+```bash
+> help MOV
+```
 
 ### Supported Platforms
 The simulator app is compatible with Windows, Linux, and macOS.
@@ -56,4 +62,14 @@ The simulator app is compatible with Windows, Linux, and macOS.
 - macOS: Similar to Linux, ensure the required dependencies are installed.
 
 ### Contributing
+- Linux: Ensure you have the necessary dependencies by running the command mentioned under [Prerequisites.](#prerequisites)
+- macOS: Similar to Linux, ensure the required dependencies are installed.
+
+## Currently Working On:
+1. Flag modification `main`
+1. Branching Group `main`
+2. AI integration
+2. Stack Group
+
+## Contributing
 Feel free to contribute to the project by opening issues or submitting pull requests. Your feedback and contributions are highly appreciated. Happy coding!
