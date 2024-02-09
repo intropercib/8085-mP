@@ -9,13 +9,11 @@ class Control_Unit:
 
     def __init__(self):
         self.exe_mode = 1 # 1 -> interpret, 0 -> compile 
-        # _utils.load_memory()
         self.__token:dict = _utils.get_token()
         self.__data_inst = Data(self.__token)
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
-        #init "PC":"1000H"
 
         self.__param_rule = {
             'MOV':(2,1,1),
