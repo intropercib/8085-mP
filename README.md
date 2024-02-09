@@ -62,6 +62,9 @@ The simulator app is compatible with Windows, Linux, and macOS.
 - Linux: Ensure you have the necessary dependencies by running the command mentioned under ["Prerequisites"](#prerequisites).
 - macOS: Similar to Linux, ensure the required dependencies are installed.
 
+### App Teaser
+![Video Title](assets/demo.gif)
+
 ### Contributing
 - Linux: Ensure you have the necessary dependencies by running the command mentioned under [Prerequisites.](#prerequisites)
 - macOS: Similar to Linux, ensure the required dependencies are installed.
