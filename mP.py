@@ -166,15 +166,12 @@ class Simulator:
         if len(self.__rp(rp)) != 5: return True
         else: return False
 
-<<<<<<< HEAD
-=======
     def __check_flag(self,flag):
         if flag == 'C':
             if len(self.__registers['A']) > 3:
                 self.__flags['C'] = 1
                 self.__registers['A'] = self.__registers['A'][1:]
             
->>>>>>> main
     def __filter(self,arg:str, conversion:int = 16):
         return int(arg.replace('H',''),conversion)
 
@@ -234,20 +231,13 @@ class Simulator:
     
     def __stax(self,rp:str):
         if rp == 'B':
-<<<<<<< HEAD
             self.__memory_address[self.__rp('B')] = self.__registers['A'] 
         elif rp == 'D':
                 self.__memory_address[self.__rp('D')] = self.__registers['A']
         else:
-                self.__memory_address[self.__rp()] = self.__registers['A']
-=======
-            self.__memory_address[self.__rp('B')] = self.__registers['A']
-        elif rp == 'D':
-            self.__memory_address[self.__rp('D')] = self.__registers['A']
-        else:
             self.__memory_address[self.__rp()] = self.__registers['A']
->>>>>>> main
-
+            self.__memory_address[self.__rp('B')] = self.__registers['A']
+        
     def __lhld(self,ma:str):
         self.__registers['L'] = self.__memory_address[ma]
         self.__registers['H'] = self.__memory_address[str(int(ma[:-1]) + 1) + 'H']
