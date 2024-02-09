@@ -9,9 +9,10 @@ This project provides a user-friendly app interface for simulating the 8085 micr
 ## Features
 
 - Execute a variety of 8085 instructions using an intuitive chat-like interface.
-- View the contents of `registers`, `memory`, `flags`, `ports`, and other components dynamically.
 - Streamlined commands for exploring the state of the microprocessor.
-- Use `8085A` **your personal AI ready to assist you with all your problems related to 8085 mP.**
+- AI feature for contextual understanding of 8085 microprocessor-related questions.
+- Ability to execute instructions bitwise or in compile mode.
+
 ## Getting Started
 
 ### Prerequisites
