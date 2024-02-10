@@ -8,59 +8,12 @@ from ._peripheral import Peripheral
 class Control_Unit:
 
     def __init__(self):
+        self.exe_mode = 1 # 1 -> interpret, 0 -> compile 
         self.__token:dict = _utils.get_token()
         self.__data_inst = Data(self.__token)
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
-        #init
-
-        self.__param_rule = {
-            'MOV':(2,1,1),
-            'MVI':(2,1,3),
-            'LXI':(2,1,5),
-            'LDA':(1,5),
-            'STA':(1,5),
-            'LDAX':(1,1),
-            'STAX':(1,1),
-            'LHLD':(1,5),
-            'SHLD':(1,5),
-            'XCHG':(0,0),
-            'IN':(1,3),
-            'OUT':(1,3),
-            'ADD':(1,1),
-            'ADI':(1,3),
-            'ADC':(1,1),
-            'SUB':(1,1),
-            'SUI':(1,3),
-            'SBB':(1,1),
-            'SBI':(1,3),
-            'INR':(1,1),
-            'DCR':(1,1),
-            'INX':(1,1),
-            'DCX':(1,1),
-            'DAD':(1,1),
-            'DAA':None,
-            'RRC':(0,0),
-            'RAR':(0,0),
-            'RLC':(0,0),
-            'RAL':(0,0),
-            'ANI':(1,3),
-            'XRI':(1,3),
-            'ORI':(1,3),
-            'ANA':(1,1),
-            'ORA':(1,1),
-            'XRA':(1,1),
-            'CMA':(0,0),
-            'CPI':(1,3),
-            'CMC':(0,0),
-            'STC':(0,0)
-        }
-    
-    def __rp(self,rp:str = 'H') -> str:
-        if rp == 'B': return self.__register['B'] + self.__register['C'] + 'H'
-        elif rp == 'D': return  self.__register['D'] + self.__register['E'] + 'H'
-        else: return self.__register['H'] + self.__register['L'] + 'H'
         
     def inst_set(self):
         return {
@@ -97,6 +50,8 @@ class Control_Unit:
         else:
             _utils.load_memory(arg=self.__token)
             return self.__token        
+
+
 
     def check_param(self,inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
