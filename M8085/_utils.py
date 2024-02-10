@@ -103,7 +103,7 @@ class Tool:
                      len(prompt[1]) == 5 and prompt[1] not in Tool.TOKEN['memory'].keys()]
                 ): return 'MemoryError'
                 elif len(prompt[1]) == 3 and prompt[1] not in Tool.TOKEN['port'].keys(): return 'DataError'
-                else: return prompt
+                else: return tuple(prompt)
     
     def check_pointer(rp:str) -> bool:
         if rp == 'M': rp = 'H'

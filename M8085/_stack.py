@@ -6,8 +6,7 @@ class Stack:
         self.__register = token['register']
         Tool.TOKEN = token
 
-    def push(self, arg:list):
-        rp = arg[0]
+    def push(self, rp:str):
         if rp == 'B':
             self.__stack[self.__register['SP']] = self.__register['B']  + self.__register['C']
 
@@ -19,8 +18,7 @@ class Stack:
 
         self.__register['SP'] = encode(decode(self.__register['SP'])-1)
 
-    def pop(self,arg:list):
-        rp = arg[0]
+    def pop(self,rp:str):
         self.__register['SP'] = encode(decode(self.__register['SP'])+1)
         if rp == 'B':
             self.__register['B'] = self.__register['SP'][:2] 

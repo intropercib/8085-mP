@@ -39,24 +39,23 @@ class Logical:
         Tool.check_parity(self.__register['A']) 
         Tool.check_zero(self.__register['A']) 
         
-    def __ani(self, arg: list):
-        self.__register['A'] = encode(decode(self.__register['A']) & decode(arg[0]))
+    def __ani(self, data:str):
+        self.__register['A'] = encode(decode(self.__register['A']) & decode(data))
         self.__flag['C'], self.__flag['AC'] = 0, 1
         Tool.check_parity(self.__register['A']) 
         Tool.check_zero(self.__register['A']) 
 
-    def __xri(self, arg: list):
-        self.__register['A'] = encode(decode(self.__register['A']) ^ decode(arg[0]))
+    def __xri(self, data:str):
+        self.__register['A'] = encode(decode(self.__register['A']) ^ decode(data))
         self.__flag['C'], self.__flag['AC'] = 0, 0
 
-    def __ori(self, arg: list):
-        self.__register['A'] = encode(decode(self.__register['A']) | decode(arg[0]))
+    def __ori(self, data:str):
+        self.__register['A'] = encode(decode(self.__register['A']) | decode(data))
         self.__flag['C'], self.__flag['AC'] = 0, 0
         Tool.check_parity(self.__register['A']) 
         Tool.check_zero(self.__register['A']) 
 
-    def __ana(self, arg: list):
-        r = arg[0]
+    def __ana(self, r:str):
         if r == 'M':
             self.__register['A'] = encode(decode(self.__register['A']) & decode(self.__memory_address[Tool.rp()]))
         else:
@@ -65,8 +64,7 @@ class Logical:
         Tool.check_parity(self.__register['A']) 
         Tool.check_zero(self.__register['A']) 
 
-    def __ora(self, arg: list):
-        r = arg[0]
+    def __ora(self, r:str):
         if r == 'M':
             self.__register['A'] = encode(decode(self.__register['A']) | decode(self.__memory_address[Tool.rp()]))
         else:
@@ -75,8 +73,7 @@ class Logical:
         Tool.check_parity(self.__register['A']) 
         Tool.check_zero(self.__register['A'])
 
-    def __xra(self, arg: list):
-        r = arg[0]
+    def __xra(self, r:str):
         if r == 'M':
             self.__register['A'] = encode(decode(self.__register['A']) ^ decode(self.__memory_address[Tool.rp()]))
         else:
@@ -88,12 +85,12 @@ class Logical:
     def __cma(self):
         self.__registers['A'] = encode(~decode(self.__registers['A']) & 0xFF)
 
-    def __cmp(self, arg: list):
+    def __cmp(self, r:str):
         a_value = decode(self.__register['A'])
-        if arg[0] == "M":
+        if r == "M":
             data_value = decode(self.__memory_address[Tool.rp()])
         else:
-            data_value = decode(self.__register[arg[0]])
+            data_value = decode(self.__register[r])
         if a_value < data_value:
             self.__flag['C'], self.__flag['Z'] = 1, 0
         elif a_value == data_value:
@@ -101,9 +98,9 @@ class Logical:
         else:
             self.__flag['C'], self.__flag['Z'] = 0, 0
     
-    def __cpi(self, arg: list):
+    def __cpi(self, data:str):
         a_value = decode(self.__register['A'])
-        data_value = decode(arg[0])
+        data_value = decode(data)
         if a_value < data_value:
             self.__flag['C'], self.__flag['Z'] = 1, 0
         elif a_value == data_value:
