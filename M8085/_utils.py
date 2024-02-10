@@ -14,10 +14,13 @@ class Setup:
         return port
 
     def register():
-        return {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
+        return {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None, 'PC':'','SP':'7FFFH'}
 
     def flag():
         return {'S':0,'Z':0,'AC':0,'P':0,'C':0}
+    
+    def stack():
+        return {hex(i)[2:].upper() + 'H':'0' for i in range(20480,32768)}
     
 class Tool:
     TOKEN = None
@@ -64,6 +67,7 @@ class Tool:
             'STC':(0,0)
         }
 
+    inst = {}
 
     def check_param(inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
@@ -133,14 +137,15 @@ def get_token():
     with open("M8085/memory.json","r") as load:
         return json.load(load)
 
-def load_memory(arg,flag=True):
+def load_memory(arg:dict | bool=False):
     with open("M8085/memory.json","w") as dump:
-        if flag:
+        if arg:
             json.dump(arg,dump,indent=4)
 
         else:
             data = {
                 "memory":Setup.memory(),
+                "stack":Setup.stack(),
                 "register":Setup.register(),
                 "flag":Setup.flag(),
                 "port":Setup.port(),
