@@ -58,6 +58,7 @@ class Tool:
             'ORA':(1,1),
             'XRA':(1,1),
             'CMA':(0,0),
+            'CMP':(1,1),
             'CPI':(1,3),
             'CMC':(0,0),
             'STC':(0,0)
@@ -109,8 +110,25 @@ class Tool:
         if rp == 'B': return Tool.TOKEN["register"]['B'] + Tool.TOKEN["register"]['C'] + 'H'
         elif rp == 'D': return  Tool.TOKEN["register"]['D'] + Tool.TOKEN["register"]['E'] + 'H'
         else: return Tool.TOKEN["register"]['H'] + Tool.TOKEN["register"]['L'] + 'H'
-
-
+    
+    def check_parity(result:str):
+        if len( [_ for _ in bin(decode(result[:-1]))[1:] if _ == '1'] ) % 2 == 0:
+            Tool.TOKEN['flag']['P'] = 1
+        else:
+            Tool.TOKEN['flag']['P'] = 0
+        
+    def check_zero(result:str):
+        if decode(result[:-1]) == 0:
+            Tool.TOKEN['flag']['Z'] = 1
+        else:
+            Tool.TOKEN['flag']['Z'] = 0
+    
+    def check_sign(result:str):
+        if decode(result[:-1]) < 0:
+            Tool.TOKEN['flag']['S'] = 1
+        else:
+            Tool.TOKEN['flag']['S'] = 0
+            
 def get_token():
     with open("M8085/memory.json","r") as load:
         return json.load(load)
@@ -129,13 +147,11 @@ def load_memory(arg,flag=True):
             }
             json.dump(data,dump,indent=4)
 
-def decode(arg:str, conversion:int = 16):
-    return int(arg.replace('H',''),conversion)
+def decode(arg:str, base:int = 16):
+    return int(arg.replace('H',''),base)
 
-def encode(arg:int | bool, flag:str = 'hex'):
-    if flag == 'bin':
-        return bin(arg)
-    elif flag == 'bool':
-        return int(arg)
-    elif flag == 'hex':
-        return hex(arg)[2:].upper() + 'H'
+def encode(arg:int):
+    if len(hex(arg)[2:].upper()) < 2:
+        return '0' + hex(arg)[2:].upper() + 'H'
+    
+    return hex(arg)[2:].upper() + 'H'

@@ -2,6 +2,7 @@ from ._utils import Tool
 class Data:
 
     def __init__(self,token:dict):
+        Tool.TOKEN = token
         self.__memory_address:dict = token['memory']
         self.__register:dict = token['register']
 
