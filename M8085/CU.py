@@ -3,7 +3,7 @@ from ._data import Data
 from ._arithmetic import Arithmetic
 from ._logical import Logical
 from ._peripheral import Peripheral
-#Import
+from ._stack import Stack
 
 class Control_Unit:
 
@@ -14,13 +14,20 @@ class Control_Unit:
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
+        self.__stack_inst = Stack(self.__token)
 
         self.__inst_set = {
             "Data":self.__data_inst.get_inst(),
             "Arithematic":self.__arithmetic_inst.get_inst(),
             "Logical":self.__logical_inst.get_inst(),
-            "Peripheral":self.__peripheral_inst.get_inst()
+            "Peripheral":self.__peripheral_inst.get_inst(),
+            "Stack":self.__stack_inst.get_inst()
         }
+    
+    def inst_list(self):
+        return [j for i in self.__inst_set
+                    for j in self.__inst_set[i]
+            ]
     
     def exe(self,instType:int,inst:str,prompt:str=None):
 
@@ -33,29 +40,13 @@ class Control_Unit:
                 pass       
 
     def show_memory(self,ic=True):
-        if ic:
-            return self.__token['memory']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+            return self.__token['memory']        
 
     def show_register(self,ic=True):
-        if ic:
-            return self.__token['register']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+        return self.__token['register']
 
     def show_flag(self,ic=True):
-        if ic:
-            return self.__token['flag']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+        return self.__token['flag']
 
     def show_port(self,ic=True):
-        if ic:
-            return self.__token['port']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token
+        return self.__token['port']
