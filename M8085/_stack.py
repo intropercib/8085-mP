@@ -1,7 +1,7 @@
 from ._utils import encode,decode,Tool
 
 class Stack:
-    def __init__(self,token):
+    def __init__(self,token:dict):
         self.__stack = token['stack']
         self.__register = token['register']
         Tool.TOKEN = token
