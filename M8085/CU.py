@@ -39,14 +39,14 @@ class Control_Unit:
             elif not self.exe_mode:
                 pass       
 
-    def show_memory(self,ic=True):
+    def show_memory(self):
             return self.__token['memory']        
 
-    def show_register(self,ic=True):
+    def show_register(self):
         return self.__token['register']
 
-    def show_flag(self,ic=True):
+    def show_flag(self):
         return self.__token['flag']
 
-    def show_port(self,ic=True):
+    def show_port(self):
         return self.__token['port']
