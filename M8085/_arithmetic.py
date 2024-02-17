@@ -35,8 +35,8 @@ class Arithmetic:
         Tool.check_zero(self.__register['A'])         
         Tool.check_sign(self.__register['A'])         
         
-    def __adi(self,arg:list):
-        self.__register['A'] = encode(decode(self.__register['A']) +  decode(arg[0]))
+    def __adi(self,data:str):
+        self.__register['A'] = encode(decode(self.__register['A']) +  decode(data))
 
         if len(self.__register['A']) > 3:
             self.__flag['C'] = 1

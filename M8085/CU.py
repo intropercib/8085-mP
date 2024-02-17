@@ -16,28 +16,29 @@ class Control_Unit:
         self.__peripheral_inst = Peripheral(self.__token)
         self.__stack_inst = Stack(self.__token)
 
-        self.__inst_set = {
-            "Data":self.__data_inst.get_inst(),
-            "Arithematic":self.__arithmetic_inst.get_inst(),
-            "Logical":self.__logical_inst.get_inst(),
-            "Peripheral":self.__peripheral_inst.get_inst(),
-            "Stack":self.__stack_inst.get_inst()
-        }
+        self.__inst_set = (
+            self.__data_inst.get_inst(),
+            self.__arithmetic_inst.get_inst(),
+            self.__logical_inst.get_inst(),
+            self.__peripheral_inst.get_inst(),
+            self.__stack_inst.get_inst()
+        )
     
     def inst_list(self):
-        return [j for i in self.__inst_set
-                    for j in self.__inst_set[i]
-            ]
+        return [j for i in self.__inst_set for j in i]
     
-    def exe(self,instType:int,inst:str,prompt:str=None):
-
-        if instType in range(0,5):
-            type:str = [_ for _ in self.__inst_set][instType]
-        
+    def exe(self,inst:str,prompt:str=None):
             if self.exe_mode:
-                self.__inst_set[type][inst](prompt)
+                for dict in self.__inst_set:
+                    for key in dict:
+                        if inst == key:
+                            if prompt == None:
+                                dict[key]()
+                            else:        
+                                dict[key](prompt)
+
             elif not self.exe_mode:
-                pass       
+                pass
 
     def show_memory(self):
             return self.__token['memory']        
@@ -50,3 +51,6 @@ class Control_Unit:
 
     def show_port(self):
         return self.__token['port']
+
+    def get_token(self):
+        return self.__token

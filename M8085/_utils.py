@@ -1,4 +1,5 @@
 import json
+from random import randbytes
 
 class Setup:
     def memory():
@@ -14,7 +15,7 @@ class Setup:
         return port
 
     def register():
-        return {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None, 'PC':'','SP':'7FFFH'}
+        return {'A':'0','B':'0','C':'0','D':'0','E':'0','H':'0','L':'0','PC':'0','SP':'7FFFH'}
 
     def flag():
         return {'S':0,'Z':0,'AC':0,'P':0,'C':0}
@@ -72,18 +73,18 @@ class Tool:
     def check_param(inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
 
-        if Tool.PARAM_RULE[inst][0] == 0:
-            if len(prompt[0]) >= 1: return 'SyntaxError'
+        if Tool.PARAM_RULE[inst][0] == 0 and prompt[0] != '': return 'NoArgumentError'
 
         elif Tool.PARAM_RULE[inst][0] == 1:
-
             if len(prompt[0]) != Tool.PARAM_RULE[inst][1]: return 'SyntaxError'
             elif len(prompt[0]) == 0: return 'TypeError'
             elif len(prompt[0]) == 1 and prompt[0] not in Tool.TOKEN['register'].keys(): return 'RegisterError'
             elif len(prompt[0]) == 5 and prompt[0] not in Tool.TOKEN['memory'].keys(): return 'MemoryError'
             elif len(prompt[0]) == 3 and prompt[0] not in Tool.TOKEN['port'].keys(): return 'DataError'
-            else: return prompt
-
+            elif inst in ['LDAX','STAX','INX','DCX','DAD']: 
+                if prompt[0] not in ['H','B','D']: return 'RpError'
+                elif Tool.check_pointer(prompt[0]): return 'PointerError'
+            else: return tuple(prompt)
         else:
             if arg.find(',') == -1: return 'CommaError' 
             elif any([len(prompt[0]) != Tool.PARAM_RULE[inst][1],
@@ -93,11 +94,15 @@ class Tool:
                 if any([len(prompt[0]) == 1  and prompt[0] == 'M' and Tool.check_pointer(prompt[0]),
                         len(prompt[1]) == 1 and prompt[1] == 'M' and Tool.check_pointer(prompt[0])]
                 ): return 'PointerError'
-
-                if any(
+                elif any(
                     [len(prompt[0]) == 1 and prompt[0] not in Tool.TOKEN['register'].keys(),
                      len(prompt[1]) == 1 and prompt[1] not in Tool.TOKEN['register'].keys()]
                 ): return 'RegisterError'
+                elif any(
+                    [len(prompt[0]) == 1 and inst == 'LXI' and prompt[0] not in ['H','B','D'], 
+                     len(prompt[1]) == 1 and inst == 'LXI' and prompt[1] not in ['H','B','D']
+                    ]
+                ): return 'RpError'
                 elif any(
                     [len(prompt[0]) == 5 and prompt[0] not in Tool.TOKEN['memory'].keys(),
                      len(prompt[1]) == 5 and prompt[1] not in Tool.TOKEN['memory'].keys()]
@@ -132,6 +137,28 @@ class Tool:
             Tool.TOKEN['flag']['S'] = 1
         else:
             Tool.TOKEN['flag']['S'] = 0
+
+class History:
+    
+    TOKEN = None
+
+    history = {}
+
+    def code_address():
+        total = 0
+        address = ''
+        while any([len(address) != 5, address in History.history]):
+            for i in randbytes(5):
+                total += i * 10
+                address = hex(total).upper()[2:] + 'H'
+        else:
+            return address
+    
+    def auto_push():
+        pass
+    
+    def auto_pop():
+        pass
             
 def get_token():
     with open("M8085/memory.json","r") as load:
