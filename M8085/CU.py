@@ -3,7 +3,7 @@ from ._data import Data
 from ._arithmetic import Arithmetic
 from ._logical import Logical
 from ._peripheral import Peripheral
-#Import
+from ._stack import Stack
 
 class Control_Unit:
 
@@ -14,48 +14,43 @@ class Control_Unit:
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
+        self.__stack_inst = Stack(self.__token)
 
-        self.__inst_set = {
-            "Data":self.__data_inst.get_inst(),
-            "Arithematic":self.__arithmetic_inst.get_inst(),
-            "Logical":self.__logical_inst.get_inst(),
-            "Peripheral":self.__peripheral_inst.get_inst()
-        }
+        self.__inst_set = (
+            self.__data_inst.get_inst(),
+            self.__arithmetic_inst.get_inst(),
+            self.__logical_inst.get_inst(),
+            self.__peripheral_inst.get_inst(),
+            self.__stack_inst.get_inst()
+        )
     
-    def exe(self,instType:int,inst:str,prompt:str=None):
-
-        if instType in range(0,5):
-            type:str = [_ for _ in self.__inst_set][instType]
-        
+    def inst_list(self):
+        return [j for i in self.__inst_set for j in i]
+    
+    def exe(self,inst:str,prompt:str=None):
             if self.exe_mode:
-                self.__inst_set[type][inst](prompt)
+                for dict in self.__inst_set:
+                    for key in dict:
+                        if inst == key:
+                            if prompt == None:
+                                dict[key]()
+                            else:        
+                                dict[key](prompt)
+
             elif not self.exe_mode:
-                pass       
+                pass
 
-    def show_memory(self,ic=True):
-        if ic:
-            return self.__token['memory']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+    def show_memory(self):
+            return self.__token['memory']        
 
-    def show_register(self,ic=True):
-        if ic:
-            return self.__token['register']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+    def show_register(self):
+        return self.__token['register']
 
-    def show_flag(self,ic=True):
-        if ic:
-            return self.__token['flag']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token        
+    def show_flag(self):
+        return self.__token['flag']
 
-    def show_port(self,ic=True):
-        if ic:
-            return self.__token['port']
-        else:
-            _utils.load_memory(arg=self.__token)
-            return self.__token
+    def show_port(self):
+        return self.__token['port']
+
+    def get_token(self):
+        return self.__token
