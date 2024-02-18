@@ -1,38 +1,36 @@
-from ._utils import History
+from ._utils import encode,decode
 
 class Branch:
     def __init__(self,token:dict):
-        History.TOKEN = token
-        self.__memory_address:dict = token['memory']
         self.__register:dict = token['register']
         self.__flag:dict = token['flag']
         
     def __jmp(self,kywrd:str):
-        return History.histroy[kywrd] 
+        self.__register['SP'] = encode(decode(self.__register['SP']) - 1) 
     
     def __jc(self, kywrd:str):    
-        return History.histroy[kywrd] if self.__flag['C'] else 0
+        if self.__flag['C']: self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
         
     def __jnc(self, kywrd:str):
-        return History.histroy[kywrd] if not self.__flag['C'] else 0
+        if not self.__flag['C']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
     
     def __jz(self, kywrd:str):
-        return History.histroy[kywrd] if self.__flag['Z'] else 0
+        if self.__flag['Z']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
         
     def __jnz(self, kywrd:str):
-        return History.histroy[kywrd] if not self.__flag['Z'] else 0
+        if not self.__flag['Z']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
     
     def __jpe(self, kywrd:str):
-        return History.histroy[kywrd] if self.__flag['P'] else 0
+        if self.__flag['P']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
         
     def __jpo(self, kywrd:str):
-        return History.histroy[kywrd] if not self.__flag['P'] else 0
+        if not self.__flag['P']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
     
     def __jm(self, kywrd:str):
-        return History.histroy[kywrd] if self.__flag['S'] else 0
+        if self.__flag['S']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
         
     def __jp(self, kywrd:str):
-        return History.histroy[kywrd] if not self.__flag['S'] else 0
+        if not self.__flag['S']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
     
     def get_inst(self):
         return {

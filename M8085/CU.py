@@ -9,7 +9,7 @@ from ._stack import Stack
 class Control_Unit:
 
     def __init__(self):
-        self.exe_mode = 1 # 1 -> interpret, 0 -> compile 
+        self.exe_mode = 0 # 1 -> interpret, 0 -> compile 
         self.__token:dict = _utils.get_token()
         self.__data_inst = Data(self.__token)
         self.__arithmetic_inst = Arithmetic(self.__token)
@@ -17,6 +17,7 @@ class Control_Unit:
         self.__peripheral_inst = Peripheral(self.__token)
         self.__branch_inst = Branch(self.__token)
         self.__stack_inst = Stack(self.__token)
+        _utils.History.TOKEN = _utils.Tool.TOKEN = self.__token
 
         self.__inst_set = (
             self.__data_inst.get_inst(),
@@ -28,20 +29,27 @@ class Control_Unit:
         )
     
     def inst_list(self):
-        return [j for i in self.__inst_set for j in i]
+        return [_ for _ in _utils.Tool.PARAM_RULE]
     
-    def exe(self,inst:str,prompt:str=None):
-            if self.exe_mode:
+    def store(self,inst:str,prompt:str=None):
+            _utils.History.update((inst, (prompt)))
+
+    def HLT(self):
+        while True:
+            inst, prompt = _utils.History.fetch()
+            if any([inst == 'HLT',inst == 'RST5', inst == prompt == None]):
+                _utils.History.TOKEN['stack'] = _utils.Setup.stack()
+                _utils.History.history = {}
+                _utils.History.TOKEN['register']['SP'] = '7FFFH'
+                break
+            else:
                 for dict in self.__inst_set:
                     for key in dict:
                         if inst == key:
                             if prompt == None:
                                 dict[key]()
-                            else:        
-                                dict[key](prompt)
-
-            elif not self.exe_mode:
-                pass
+                            else:
+                                dict[key](prompt)            
 
     def show_memory(self):
             return self.__token['memory']        
