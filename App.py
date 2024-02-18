@@ -1,7 +1,7 @@
 import streamlit as st
 from prettytable import PrettyTable
 from json import load
-from M8085 import Control_Unit
+from M8085 import Control_Unit, Tool, get_token
 from Ai import Assistant
 
 st.set_page_config(page_title="8085 Simulator",page_icon="assets/icon.png")
@@ -15,19 +15,6 @@ Get started by entering commands such as 'MOV A, B' or 'LXI H, 2000H'.""")
 class App():
     def __init__(self):
 
-        if "memory" not in st.session_state:
-            st.session_state.memory = {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
-        if "register" not in st.session_state:
-            st.session_state.register = {'A':'0','B':'0','C':'0','D':'0','E':'0','F':'0','H':'0','L':'0','M':None}
-        if "flag" not in st.session_state:
-            st.session_state.flag = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
-        if "port" not in st.session_state:
-            st.session_state.port = {}
-        for i in range(256):
-            if len(hex(i)[2:]) == 1 :st.session_state.port['0' + hex(i)[2:].upper() + 'H'] = '0'
-            else: st.session_state.port[hex(i)[2:].upper() + 'H'] = '0'
-
-        super().__init__(st.session_state.memory, st.session_state.register,st.session_state.flag,st.session_state.port)
         self.error_msg = {
             'CommaError':lambda:[st.chat_message("assistant").write('Error: , missing'),
                 self.history('assistant','Error: , missing')],
@@ -52,6 +39,10 @@ class App():
         }
         with open("Syntax.json", "r") as errordict:
             self.specify_msg = load(errordict)
+        if 'token' not in st.session_state:
+            st.session_state['token'] = get_token()
+        self.cu = Control_Unit(st.session_state.token)
+        Tool.TOKEN = st.session_state.token
         self.display()
 
     def display(self):
@@ -72,30 +63,21 @@ class App():
 
     def scrap(self,prompt:str):
         prompt_chunk = prompt.split(" ")
-        if prompt_chunk[0] in self.show_op_code():
+        if prompt_chunk[0] in self.cu.inst_list():
             inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
-            status = self.check_param(inst,param)
+            status = Tool.check_param(inst,param)
             if status == 'CommaError' or status == 'TypeError':self.error_msg[status]()
             elif status == 'SyntaxError':self.error_msg[status](prompt,self.specify_msg[inst]['Syntax'])
             elif status == 'MemoryError':self.error_msg[status](prompt)
             elif status == 'RegisterError':self.error_msg[status](prompt)
             elif status == 'PortError':self.error_msg[status](prompt)
             elif status == 'DataError':self.error_msg[status](prompt)
-            elif status == 'PointerError':self.error_msg[status]('M')
-            elif inst in ['LXI','LDAX','STAX','INX','DCX']:
-                if status == 'RegisterError' or param[0] in ['A','M','F']:
-                    self.error_msg['RpError'](param[0])
-                elif inst != 'LXI' and  self.check_pointer(param[0]):
-                    self.error_msg['PointerError'](param[0])
-                else:
-                    pass
+            elif status == 'RpError': self.error_msg[status](prompt[0])
+            elif status == 'NoArgumentError': self.error_msg['NoArgumentError'](inst)
+            elif inst in ['HLT','RST5.5']:
+                self.cu.HLT()
             else:
-                if inst in ['MOV','MVI']:
-                    self.op_code(inst)(status[0],status[1])
-                elif inst in ['XCHG','RAR','RRC','RAL','RLC']:
-                    self.op_code(inst)()
-                else:
-                    self.op_code(inst)(status[0])
+                self.cu.store(inst,status)
 
         elif prompt_chunk[0] == 'exam':
             if prompt_chunk[1] == 'memory': 
@@ -103,7 +85,7 @@ class App():
                 memory_table = PrettyTable(['Memory Address', 'Content'])
                 try:
                     for i in memory_list.split(','):
-                        memory_table.add_row([i.upper(),st.session_state.memory[i.upper()]])
+                        memory_table.add_row([i.upper(),st.session_state.token["memory"][i.upper()]])
 
                 except KeyError:
                     st.chat_message('assistant').write('Error: TypeError: Parameter not fulfilled. Should be exam memory (memory address, ...)')
@@ -115,16 +97,16 @@ class App():
 
             elif prompt_chunk[1] == 'register':
                 register_table = PrettyTable(['Register', 'Content'])
-                for i in self.show_register():
-                    if i != 'M' and i != 'F':
-                        register_table.add_row([i,st.session_state.register[i]])
+                for i in self.cu.show_register():
+                    if i != 'M':
+                        register_table.add_row([i,st.session_state.token["register"][i]])
                 st.chat_message('assistant').write(register_table)
                 self.history('assistant',register_table)
             
             elif prompt_chunk[1] == 'flag':
                 flag_table = PrettyTable(['Flag', 'Content'])
-                for i in self.show_flag():
-                    flag_table.add_row([i,st.session_state.flag[i]])
+                for i in self.cu.show_flag():
+                    flag_table.add_row([i,st.session_state.token["flag"][i]])
                 st.chat_message('assistant').write(flag_table)
                 self.history('assistant',flag_table)
             
@@ -133,7 +115,7 @@ class App():
                 port_table = PrettyTable(['Port Address', 'Content'])
                 try:
                     for i in port_list.split(','):
-                        port_table.add_row([i.upper(),st.session_state.port[i.upper()]])
+                        port_table.add_row([i.upper(),st.session_state.token['port'][i.upper()]])
 
                 except KeyError:
                     st.chat_message('assistant').write('Error: TypeError: Parameter not fulfilled. Should be exam memory (port address, ...)')
