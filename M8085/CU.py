@@ -8,16 +8,16 @@ from ._stack import Stack
 
 class Control_Unit:
 
-    def __init__(self):
+    def __init__(self,token):
         self.exe_mode = 0 # 1 -> interpret, 0 -> compile 
-        self.__token:dict = _utils.get_token()
+        self.__token:dict = token
         self.__data_inst = Data(self.__token)
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
         self.__branch_inst = Branch(self.__token)
         self.__stack_inst = Stack(self.__token)
-        _utils.History.TOKEN = _utils.Tool.TOKEN = self.__token
+        _utils.History.TOKEN = self.__token
 
         self.__inst_set = (
             self.__data_inst.get_inst(),
