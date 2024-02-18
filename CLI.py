@@ -3,7 +3,7 @@ import time
 import os
 from json import load
 from prettytable import PrettyTable
-from M8085 import Control_Unit, Tool, Docs
+from M8085 import Control_Unit, Tool, Docs, get_token
 from Ai import Assistant
 
 class Interface(Cmd):
@@ -23,7 +23,7 @@ class Interface(Cmd):
 
     def __init__(self):
         super().__init__()
-        self.cu = Control_Unit()
+        self.cu = Control_Unit(get_token())
         Tool.TOKEN = self.cu.get_token()
         if os.name == 'nt': os.system('CLS')
         elif os.name == 'posix': os.system('clear')
