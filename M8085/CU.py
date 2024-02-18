@@ -3,6 +3,7 @@ from ._data import Data
 from ._arithmetic import Arithmetic
 from ._logical import Logical
 from ._peripheral import Peripheral
+from ._branch import Branch
 from ._stack import Stack
 
 class Control_Unit:
@@ -14,6 +15,7 @@ class Control_Unit:
         self.__arithmetic_inst = Arithmetic(self.__token)
         self.__logical_inst = Logical(self.__token)
         self.__peripheral_inst = Peripheral(self.__token)
+        self.__branch_inst = Branch(self.__token)
         self.__stack_inst = Stack(self.__token)
 
         self.__inst_set = (
@@ -21,6 +23,7 @@ class Control_Unit:
             self.__arithmetic_inst.get_inst(),
             self.__logical_inst.get_inst(),
             self.__peripheral_inst.get_inst(),
+            self.__branch_inst.get_inst(),
             self.__stack_inst.get_inst()
         )
     
