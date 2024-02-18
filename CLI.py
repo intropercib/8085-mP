@@ -36,7 +36,6 @@ class Interface(Cmd):
             'TypeError':lambda:self.response('TypeError: Argument(s) missing'),
             'RpError': lambda arg:self.response(f'RpError: {arg}. Should be a vaild register pair (i.e B,C,D,E,H,L).'),
             'NoArgumentError':lambda inst:self.response(f'NoArgumentError: {inst} takes no argument.'),
-            'PointerError':lambda pointer:self.response(f'PointerError: {pointer} is not pointing to any memory address.'),
             'RegisterError':lambda register:self.response(f'RegisterError: {register} should be a vaild resigster (i.e. A,B,C,D,E,H,L)'),
             'DataError':lambda data:self.response(f'DataError: {data} should be a valid 8-bit data.'),
             'MemoryError':lambda memory:self.response(f'MemoryError: {memory} should be a valid 16-bit memory address.'),
@@ -58,16 +57,10 @@ class Interface(Cmd):
             elif status == 'RegisterError':self.error_msg[status](prompt)
             elif status == 'PortError':self.error_msg[status](prompt)
             elif status == 'DataError':self.error_msg[status](prompt)
-            elif status == 'PointerError': self.error_msg[status]("Register pair")
             elif status == 'RpError':self.error_msg['RpError'](param[0])
             elif status == 'NoArgumentError': self.error_msg['NoArgumentError'](inst)
             else:
-                if Tool.PARAM_RULE[inst][0] == 2: self.response("decode successfull")
-                    # self.op_code(inst)(status[0],status[1])
-                elif Tool.PARAM_RULE[inst][0] == 0: self.response("decode successfull")
-                    # self.op_code(inst)()
-                else: self.response("decode successfull")
-                    # self.op_code(inst)(status[0])
+                self.cu.store(inst,status)
         
         elif prompt_chunk[0] == 'exam':
 
@@ -87,7 +80,8 @@ class Interface(Cmd):
             elif prompt_chunk[1] == 'register':
                 register_table = PrettyTable(['Register','Content'])
                 for i in self.cu.show_register():
-                    register_table.add_row([i, self.cu.show_register()[i]])
+                    if i != 'M':
+                        register_table.add_row([i, self.cu.show_register()[i]])
                 print(register_table)
             
             elif prompt_chunk[1] == 'flag':
@@ -129,6 +123,9 @@ class Interface(Cmd):
     def do_quit(self, arg):
         "Quits your program"
         return True
+    
+    def do_HLT(self,arg):
+        self.cu.HLT()
 
     def response(self,string:str, delay=0.018):
         for char in string:
@@ -163,6 +160,7 @@ class Interface(Cmd):
         elif os.name == 'posix': os.system('clear')
 
     do_cls = do_clear
+    do_RST7 = do_RST6 = do_RST5 = do_HLT
 
 if __name__ == "__main__":
     run = Interface()
