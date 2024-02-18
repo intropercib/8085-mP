@@ -140,8 +140,14 @@ class Interface(Cmd):
         self.session["messages"].append({"role":role,"content":content})
     
     def do_help(self, arg: str):
-        for i in arg.split(','):
-            self.response(Interface.command_docs[arg],0.003)
+        remove_space = ''.join(arg.split(' '))
+        for i in remove_space.split(','):
+            try:
+                self.response("="*100 + f"\n{i}:\n" + "="*100,0.003)
+                self.response(Interface.command_docs[i],0.003)
+                self.response("="*100,0.003)
+            except KeyError:
+                self.response(f"Unknown command: {arg}.Type 'help <command name>' for a list of commands.")
 
     def do_clear(self,arg):
         """
