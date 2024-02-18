@@ -165,7 +165,7 @@ class History:
 
         History.history[code_address] = bind
         stack[stack_pointer] = code_address
-        History.TOKEN['register']['SP'] = encode(decode(stack_pointer) - 1)
+        History.TOKEN['register']['SP'] = encode(decode(History.TOKEN['register']['SP']) - 1)
     
     def fetch():
         if History.TOKEN['register']['SP'] != '7FFFH':
