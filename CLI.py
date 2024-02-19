@@ -60,7 +60,7 @@ class Interface(Cmd):
             elif status == 'RpError':self.error_msg['RpError'](param[0])
             elif status == 'NoArgumentError': self.error_msg['NoArgumentError'](inst)
             else:
-                self.cu.store(inst,status)
+                self.cu.cycle(inst,status)
         
         elif prompt_chunk[0] == 'exam':
 
