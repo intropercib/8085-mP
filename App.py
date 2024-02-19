@@ -1,7 +1,7 @@
 import streamlit as st
 from prettytable import PrettyTable
 from json import load
-from M8085 import Control_Unit, Tool, get_token
+from M8085 import Control_Unit, Tool, get_token, Docs
 from Ai import Assistant
 
 st.set_page_config(page_title="8085 Simulator",page_icon="assets/icon.png")
@@ -10,7 +10,7 @@ st.markdown("""
 This simulator allows you to interact with an emulated 8085 microprocessor.
 Type 'help' for a list of available commands or 'help <command>' for detailed information.
 
-Get started by entering commands such as 'MOV A, B' or 'LXI H, 2000H'.""")
+Get started by entering commands such as 'MOV A, B' or 'LXI H, 8000H'.""")
 
 class App():
     def __init__(self):
@@ -124,6 +124,15 @@ class App():
                 else:
                     st.chat_message('assistant').write(port_table)
                     self.history('assistant',port_table)
+            
+            # elif prompt_chunk[0] == 'help':
+            #     remove_space = ''.join(arg.split(' '))
+            #     for i in remove_space.split(','):
+            #         try:
+            #             st.chat_message('assistant').write(f'### {i}:')
+            #             st.chat_message('assistant').write(Docs.command_docs[i])
+            #         except KeyError:
+            #             st.chat_message('assistant').write(f"Unknown command: {prompt}.Type 'help <command name>' for a list of commands.")
             
             else:
                 st.chat_message("assistant").write(f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
