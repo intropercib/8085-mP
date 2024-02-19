@@ -32,25 +32,11 @@ class Control_Unit:
         return [_ for _ in _utils.Tool.PARAM_RULE]
     
     def store(self,inst:str,prompt:str=None):
-            _utils.History.update((inst, (prompt)))
+            print((inst, (prompt)))
 
     def HLT(self):
-        while True:
-            inst, prompt = _utils.History.fetch()
-            if any([inst == 'HLT',inst == 'RST5', inst == prompt == None]):
-                _utils.History.TOKEN['stack'] = _utils.Setup.stack()
-                _utils.History.history = {}
-                _utils.History.TOKEN['register']['SP'] = '7FFFH'
-                break
-            else:
-                for dict in self.__inst_set:
-                    for key in dict:
-                        if inst == key:
-                            if prompt == None:
-                                dict[key]()
-                            else:
-                                dict[key](prompt) 
-
+        print('disconnected')
+        
     def show_memory(self):
             return self.__token['memory']        
 

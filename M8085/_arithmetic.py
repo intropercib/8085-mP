@@ -124,11 +124,29 @@ class Arithmetic:
             Tool.check_sign(self.__register[r])
     
     def __inx(self,rp:str):
-        self.__memory_address[Tool.rp(rp)] = encode(decode(self.__memory_address[Tool.rp(rp)]) + 1)
+        increment = encode(decode(Tool.rp(rp)) + 1)
+        if rp == 'H':
+            self.__register['H'] = increment[:2]
+            self.__register['L'] = increment[2:-1]
+        if rp == 'B':
+            self.__register['B'] = increment[:2]
+            self.__register['C'] = increment[2:-1]
+        if rp == 'D':
+            self.__register['D'] = increment[:2]
+            self.__register['E'] = increment[2:-1]
              
     def __dcx(self,rp:str):
-        self.__memory_address[Tool.rp(rp)] = encode(decode( self.__memory_address[Tool.rp(rp)] ) - 1 ) 
-    
+        decrement = encode(decode(Tool.rp(rp)) - 1)
+        if rp == 'H':
+            self.__register['H'] = decrement[:2]
+            self.__register['L'] = decrement[2:-1]
+        if rp == 'B':
+            self.__register['B'] = decrement[:2]
+            self.__register['C'] = decrement[2:-1]
+        if rp == 'D':
+            self.__register['D'] = decrement[:2]
+            self.__register['E'] = decrement[2:-1]
+             
     def __dcr(self,r:str):
 
         if r == 'M':

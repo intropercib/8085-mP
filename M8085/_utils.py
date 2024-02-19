@@ -14,7 +14,7 @@ class Setup:
         return port
 
     def register():
-        return {'A':'0','B':'0','C':'0','D':'0','E':'0','H':'0','L':'0','M':0,'PC':'0','SP':'7FFFH'}
+        return {'A':'0','B':'0','C':'0','D':'0','E':'0','H':'0','L':'0','M':0,'PC':'0FFFH','SP':'7FFFH'}
 
     def flag():
         return {'S':0,'Z':0,'AC':0,'P':0,'C':0}
@@ -96,6 +96,7 @@ class Tool:
             elif len(prompt[0]) == 3 and prompt[0] not in Tool.TOKEN['port'].keys(): return 'DataError'
             elif inst in ['LDAX','STAX','INX','DCX','DAD']: 
                 if prompt[0] not in ['H','B','D']: return 'RpError'
+                else: return prompt[0]
             else: return prompt[0]
         else:
             if arg.find(',') == -1: return 'CommaError' 
@@ -143,39 +144,9 @@ class Tool:
             Tool.TOKEN['flag']['S'] = 0
 
 class History:
-    
     TOKEN = None
 
     history = {}
-
-    def code_address():
-        total = 0
-        address = ''
-        while any([len(address) != 5, address in History.history]):
-            for i in randbytes(5):
-                total += i * 10
-                address = hex(total).upper()[2:] + 'H'
-        else:
-            return address
-    
-    def update(bind:tuple):
-        code_address = History.code_address()
-        stack = History.TOKEN['stack']
-        stack_pointer = History.TOKEN['register']['SP']
-
-        History.history[code_address] = bind
-        stack[stack_pointer] = code_address
-        History.TOKEN['register']['SP'] = encode(decode(History.TOKEN['register']['SP']) - 1)
-    
-    def fetch():
-        if History.TOKEN['register']['SP'] != '7FFFH':
-            History.TOKEN['register']['SP'] = encode(decode(History.TOKEN['register']['SP']) + 1)
-            stack_pointer = History.TOKEN['register']['SP']
-            code_address = History.TOKEN['stack'][stack_pointer]
-            History.TOKEN['register']['PC'] = code_address
-            return History.history[code_address]
-        else:
-            return None,None #inst, param
 
 def get_token():
     return  {
