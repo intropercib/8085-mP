@@ -1,9 +1,17 @@
 from random import randbytes
+from ._instruction import opcode
 
 class Setup:
     def memory():
-        return {hex(i)[2:].upper() + 'H':'0' for i in range(32768,40960)}
-
+        memory = {}
+        for i in range(65536):
+            address = hex(i)[2:].upper()
+            if len(address) < 4:
+                bit = '0'*(4-len(address))
+                address = bit + address
+            memory[address + 'H'] = '00'
+        
+        return memory
 
     def port():
         port = {}
@@ -14,14 +22,11 @@ class Setup:
         return port
 
     def register():
-        return {'A':'0','B':'0','C':'0','D':'0','E':'0','H':'0','L':'0','M':0,'PC':'0','SP':'7FFFH'}
+        return {'A':'00','B':'00','C':'00','D':'00','E':'00','H':'00','L':'00','M':00,'PC':'0000H','SP':'0000H'}
 
     def flag():
         return {'S':0,'Z':0,'AC':0,'P':0,'C':0}
-    
-    def stack():
-        return {hex(i)[2:].upper() + 'H':'0' for i in range(20480,32768)}
-    
+        
 class Tool:
     TOKEN = None
     PARAM_RULE = {
@@ -142,45 +147,64 @@ class Tool:
         else:
             Tool.TOKEN['flag']['S'] = 0
 
-class History:
-    
+class Memory:
     TOKEN = None
 
     history = {}
+    exe_address = []
 
-    def code_address():
-        total = 0
-        address = ''
-        while any([len(address) != 5, address in History.history]):
-            for i in randbytes(5):
-                total += i * 10
-                address = hex(total).upper()[2:] + 'H'
-        else:
-            return address
-    
-    def update(bind:tuple):
-        code_address = History.code_address()
-        stack = History.TOKEN['stack']
-        stack_pointer = History.TOKEN['register']['SP']
+    def update_pc(inst:str):
+        Memory.TOKEN['register']['PC'] = encode(decode(Memory.TOKEN['register']['PC']) + opcode[inst]['byte'],4)
 
-        History.history[code_address] = bind
-        stack[stack_pointer] = code_address
-        History.TOKEN['register']['SP'] = encode(decode(stack_pointer) - 1)
+    def store(bind:tuple):
+        key = Memory.TOKEN['register']['PC']
+        Memory.history[key] = bind
+        Memory.exe_address.append(key)
     
     def fetch():
-        if History.TOKEN['register']['SP'] != '7FFFH':
-            History.TOKEN['register']['SP'] = encode(decode(History.TOKEN['register']['SP']) + 1)
-            stack_pointer = History.TOKEN['register']['SP']
-            code_address = History.TOKEN['stack'][stack_pointer]
-            History.TOKEN['register']['PC'] = code_address
-            return History.history[code_address]
+        key = Memory.TOKEN['register']['PC']
+        return Memory.history[key]
+
+    def placement(bind:tuple):
+        inst, prompt = bind
+        if any([i in opcode[inst] for i in ['H','B', 'D', 'A', 'C', 'E', 'L', 'M']]):
+        
+            key = prompt[0] if isinstance(prompt, tuple) else prompt
+
         else:
-            return None,None #inst, param
+            if inst == 'MOV':
+                key = ','.join(prompt)
+            
+            else:
+                key = 'op'
+
+        address = Memory.TOKEN['register']['PC']
+        if opcode[inst]['byte'] == 3:
+            if isinstance(prompt ,tuple):
+                for i in opcode[inst][key], prompt[1][2:-1], prompt[1][:2]:
+                    Memory.TOKEN['stack'][address] = i
+                    address = encode(decode(address) + 1,4)
+            else:
+                for i in opcode[inst][key], prompt[2:-1], prompt[:2]:
+                    Memory.TOKEN['stack'][address] = i
+                    address = encode(decode(address) + 1,4)
+            
+        elif opcode[inst]['byte'] == 2:
+            if isinstance(prompt ,tuple):
+                parse = prompt[1] if len(prompt[1]) == 3 else prompt[0]
+            else: parse = prompt
+            for i in  opcode[inst][key], parse:
+                Memory.TOKEN['stack'][address] = i
+                address = encode(decode(address) + 1,4)
+
+        elif opcode[inst]['byte'] == 1:
+            Memory.TOKEN['stack'][address] = opcode[inst][key]
+            address = encode(decode(address) + 1,4)
 
 def get_token():
     return  {
                 "memory":Setup.memory(),
-                "stack":Setup.stack(),
+                "stack":Setup.memory(),
                 "register":Setup.register(),
                 "flag":Setup.flag(),
                 "port":Setup.port(),
@@ -189,8 +213,16 @@ def get_token():
 def decode(arg:str, base:int = 16):
     return int(arg.replace('H',''),base)
 
-def encode(arg:int):
-    if len(hex(arg)[2:].upper()) < 2:
-        return '0' + hex(arg)[2:].upper() + 'H'
+def encode(arg:int, bit:int=2):
+    if bit == 2:
+        if len(hex(arg)[2:].upper()) < 2:
+            return '0' + hex(arg)[2:].upper() + 'H'
+
+        return hex(arg)[2:].upper() + 'H'
     
-    return hex(arg)[2:].upper() + 'H'
+    elif bit == 4:
+        if len(hex(arg)[2:].upper()) < 4:
+            return '0'*(4- len(hex(arg)[2:].upper())) + hex(arg)[2:].upper() + 'H'
+        
+        return hex(arg)[2:].upper() + 'H'
+    
