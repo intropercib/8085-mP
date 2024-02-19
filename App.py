@@ -39,9 +39,13 @@ class App():
         }
         with open("Syntax.json", "r") as errordict:
             self.specify_msg = load(errordict)
+
         if 'token' not in st.session_state:
-            st.session_state['token'] = get_token()
-        self.cu = Control_Unit(st.session_state.token)
+            st.session_state['token'] =  get_token()
+        if 'cu' not in st.session_state:
+            st.session_state['cu'] = Control_Unit(st.session_state.token)
+        
+        self.cu = st.session_state.cu
         Tool.TOKEN = st.session_state.token
         self.display()
 
@@ -77,7 +81,7 @@ class App():
             elif inst in ['HLT','RST5.5']:
                 self.cu.HLT()
             else:
-                self.cu.store(inst,status)
+                self.cu.cycle(inst,status)
 
         elif prompt_chunk[0] == 'exam':
             if prompt_chunk[1] == 'memory': 
