@@ -7,6 +7,8 @@ from ._peripheral import Peripheral
 from ._branch import Branch
 from ._stack import Stack
 
+from prettytable import PrettyTable
+
 class Control_Unit:
 
     def __init__(self,token):
@@ -34,11 +36,10 @@ class Control_Unit:
     def inst_list(self):
         return [_ for _ in _utils.Tool.PARAM_RULE]
     
-    def cycle(self,inst:str,prompt:str=None):
+    def cycle(self,inst:str,prompt=None):
         bind = (inst, (prompt))
         _utils.Memory.store(bind)
         _utils.Memory.placement(bind)
-        print(_utils.Memory.exe_address)
 
         if self.mode:
             self.__bit_wise(inst,prompt)
@@ -52,12 +53,12 @@ class Control_Unit:
 
     def __compile(self):
         for key in _utils.Memory.exe_address:
+            inst,prompt = _utils.Memory.history[key]
             if any([inst == 'HLT',inst == 'RST5']):
                 _utils.Memory.history = {}
                 _utils.Memory.exe_address = []
                 _utils.History.TOKEN['register']['PC'] = '0000H'
                 break
-            inst,prompt = _utils.Memory.history[key]
             self.__exe(inst,prompt)
             _utils.Memory.update_pc(inst)
 
@@ -68,24 +69,32 @@ class Control_Unit:
                     if prompt == None:
                         dict[key]()
                     else:
-                        dict[key](prompt)            
+                        dict[key](prompt)
 
-    def HLT(self):
-        while True:
-            inst, prompt = _utils.History.fetch()
-            if any([inst == 'HLT',inst == 'RST5', inst == prompt == None]):
-                _utils.History.TOKEN['stack'] = _utils.Setup.stack()
-                _utils.History.history = {}
-                _utils.History.TOKEN['register']['SP'] = '7FFFH'
+    def assemble(self):
+        assemble_table = PrettyTable(['Address','Mnemonics','Bytes','Op Code', 'Data'])
+        for address in _utils.Memory.TOKEN['stack']:
+            
+            if address == _utils.Memory.TOKEN['register']['PC']:
                 break
+
+            mnemonics = op_code = byte = data ='-'
+            if address in _utils.Memory.exe_address:
+                inst,prompt = _utils.Memory.history[address]
+                if isinstance(prompt, tuple):
+                    prompt = ','.join(prompt)
+                mnemonics = ' '.join([inst,prompt])
+                op_code = _utils.Memory.TOKEN['stack'][address]
+                byte = opcode[inst]['byte']
+
             else:
-                for dict in self.__inst_set:
-                    for key in dict:
-                        if inst == key:
-                            if prompt == None:
-                                dict[key]()
-                            else:
-                                dict[key](prompt)            
+                data = _utils.Memory.TOKEN['stack'][address]
+
+            assemble_table.add_row(
+                (address,mnemonics,byte,op_code, data)
+            )
+            
+        return assemble_table          
 
     def show_memory(self):
             return self.__token['memory']        

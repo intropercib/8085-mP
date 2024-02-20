@@ -1,5 +1,6 @@
 from random import randbytes
 from ._instruction import opcode
+from prettytable import PrettyTable
 
 class Setup:
     def memory():
@@ -200,6 +201,7 @@ class Memory:
         elif opcode[inst]['byte'] == 1:
             Memory.TOKEN['stack'][address] = opcode[inst][key]
             address = encode(decode(address) + 1,4)
+        
 
 def get_token():
     return  {
