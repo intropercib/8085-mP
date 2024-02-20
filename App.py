@@ -129,7 +129,16 @@ class App():
                     st.chat_message('assistant').write(port_table)
                     self.history('assistant',port_table)
             
-            # elif prompt_chunk[0] == 'help':
+            else:
+                st.chat_message("assistant").write(f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
+                self.history("assistant",f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
+            
+        elif prompt_chunk[0] == 'assemble':
+            table = self.cu.assemble()
+            st.chat_message("assistant").write(table)
+            self.history("assistant",table)
+
+        # elif prompt_chunk[0] == 'help':
             #     remove_space = ''.join(arg.split(' '))
             #     for i in remove_space.split(','):
             #         try:
@@ -138,10 +147,6 @@ class App():
             #         except KeyError:
             #             st.chat_message('assistant').write(f"Unknown command: {prompt}.Type 'help <command name>' for a list of commands.")
             
-            else:
-                st.chat_message("assistant").write(f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
-                self.history("assistant",f"Unknown command: {prompt}.\nType 'help' for a list of commands.")
-
         elif prompt_chunk[0] == "@ask":
             try:
                 response:str = Assistant.generate(' '.join(prompt_chunk[1:]))
