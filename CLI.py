@@ -125,11 +125,14 @@ class Interface(Cmd):
         return True
     
     def do_HLT(self,arg):
-        self.cu.HLT()
+        self.cu.cycle('HLT')
+    
+    def do_assemble(self,arg):
+        print(self.cu.assemble())
 
     def response(self,string:str, delay=0.018):
         for char in string:
-            print(char, end='', flush=True)
+            print(char, end ='', flush=True)
             time.sleep(delay)
         print('\n')
 
