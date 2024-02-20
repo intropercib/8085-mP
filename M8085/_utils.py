@@ -200,6 +200,7 @@ class Memory:
         elif opcode[inst]['byte'] == 1:
             Memory.TOKEN['stack'][address] = opcode[inst][key]
             address = encode(decode(address) + 1,4)
+        
 
 def get_token():
     return  {
