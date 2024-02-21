@@ -34,7 +34,8 @@ class Interface(Cmd):
             'CommaError':lambda:self.response('Error: , missing'),
             'SyntaxError': lambda arg,syntax: self.response(f'Invalid Syntax: {arg}. Should be {syntax}.'),
             'TypeError':lambda:self.response('TypeError: Argument(s) missing'),
-            'RpError': lambda arg:self.response(f'RpError: {arg}. Should be a vaild register pair (i.e B,C,D,E,H,L).'),
+            'RpError': lambda arg:self.response(f'RpError: {arg}. Should be a vaild register pair (i.e H,B,D).'),
+            'RpNotAllowedError': lambda :self.response(f'RpNotAllowedError: HL pair is not allowed. Should be a vaild register pair (i.e B,D).'),
             'NoArgumentError':lambda inst:self.response(f'NoArgumentError: {inst} takes no argument.'),
             'RegisterError':lambda register:self.response(f'RegisterError: {register} should be a vaild resigster (i.e. A,B,C,D,E,H,L)'),
             'DataError':lambda data:self.response(f'DataError: {data} should be a valid 8-bit data.'),
@@ -57,11 +58,16 @@ class Interface(Cmd):
             elif status == 'RegisterError':self.error_msg[status](prompt)
             elif status == 'PortError':self.error_msg[status](prompt)
             elif status == 'DataError':self.error_msg[status](prompt)
-            elif status == 'RpError':self.error_msg['RpError'](param[0])
-            elif status == 'NoArgumentError': self.error_msg['NoArgumentError'](inst)
+            elif status == 'RpError':self.error_msg[status](param[0])
+            elif status == 'RpNotAllowedError':self.error_msg[status]()
+            elif status == 'NoArgumentError': self.error_msg[status](inst)
             else:
                 self.cu.cycle(inst,status)
-        
+                if not self.cu.mode and inst == 'HLT':
+                    print(self.cu.assemble())
+                    self.cu.reset()
+                    self.mode = 1
+                    
         elif prompt_chunk[0] == 'exam':
 
             if prompt_chunk[1] == 'memory': 
@@ -123,10 +129,7 @@ class Interface(Cmd):
     def do_quit(self, arg):
         "Quits your program"
         return True
-    
-    def do_HLT(self,arg):
-        self.cu.cycle('HLT')
-    
+        
     def do_assemble(self,arg):
         print(self.cu.assemble())
 
@@ -163,7 +166,6 @@ class Interface(Cmd):
         elif os.name == 'posix': os.system('clear')
 
     do_cls = do_clear
-    do_RST7 = do_RST6 = do_RST5 = do_HLT
 
 if __name__ == "__main__":
     run = Interface()
