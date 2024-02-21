@@ -62,11 +62,11 @@ class Arithmetic:
         if r == 'M':
             if decode(self.__memory_address[Tool.rp()]) > decode(self.__register['A']):
                 self.__flag['C'] = 1  
-            self.__register['A'] = encode( decode(self.__register['A'] -  decode(self.__memory_address[Tool.rp()])) )
+            self.__register['A'] = encode( abs(decode(self.__register['A'] -  decode(self.__memory_address[Tool.rp()]))) )
         else:
             if decode(self.__register[r]) > decode(self.__register['A']):
                 self.__flag['C'] = 1
-            self.__register['A'] = encode( decode(self.__register['A']) -  decode(self.__register[r]) )
+            self.__register['A'] = encode( abs(decode(self.__register['A']) -  decode(self.__register[r])) )
         
             Tool.check_parity(self.__register['A'])  
             Tool.check_zero(self.__register['A'])  

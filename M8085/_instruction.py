@@ -88,7 +88,7 @@ opcode = {
         "op":"EB"
     },
     "LDAX":{
-        "byte":2,
+        "byte":1,
         "B":"0A",
         "D":"1A"
     },
@@ -300,6 +300,42 @@ opcode = {
     "OUT": {
         "byte": 2,
         "op": "D3"
+    },
+    "JMP": {
+        "byte": 3,
+        "op": "C3"
+    },
+    "JNZ": {
+        "byte": 3,
+        "op": "C2"
+    },
+    "JZ": {
+        "byte": 3,
+        "op": "CA"
+    },
+    "JNC": {
+        "byte": 3,
+        "op": "D2"
+    },
+    "JC": {
+        "byte": 3,
+        "op": "DA"
+    },
+    "JPO": {
+        "byte": 3,
+        "op": "E2"
+    },
+    "JPE": {
+        "byte": 3,
+        "op": "EA"
+    },
+    "JP": {
+        "byte": 3,
+        "op": "F2"
+    },
+    "JM": {
+        "byte": 3,
+        "op": "FA"
     },
     "XTHL": {
         "byte": 1,

@@ -12,7 +12,7 @@ from prettytable import PrettyTable
 class Control_Unit:
 
     def __init__(self,token):
-        self.mode = 1 # 1 -> interpret, 0 -> compile 
+        self.mode = 1# 1 -> interpret, 0 -> compile 
         self.__token:dict = token
         self.__data_inst = Data(self.__token)
         self.__arithmetic_inst = Arithmetic(self.__token)
@@ -41,11 +41,16 @@ class Control_Unit:
         _utils.Memory.store(bind)
         _utils.Memory.placement(bind)
 
+        if inst in self.__branch_inst.get_inst():
+            self.mode = 0
+
         if self.mode:
             self.__bit_wise(inst,prompt)
         
         elif not self.mode:
-            self.__compile()
+            if inst == 'HLT':
+                self.__compile()
+            _utils.Memory.update_pc(inst)            
 
     def __bit_wise(self,inst:str,prompt:str=None):
             self.__exe(inst,prompt)
@@ -55,12 +60,13 @@ class Control_Unit:
         for key in _utils.Memory.exe_address:
             inst,prompt = _utils.Memory.history[key]
             if any([inst == 'HLT',inst == 'RST5']):
-                _utils.Memory.history = {}
-                _utils.Memory.exe_address = []
-                _utils.History.TOKEN['register']['PC'] = '0000H'
                 break
             self.__exe(inst,prompt)
-            _utils.Memory.update_pc(inst)
+
+    def reset(self):
+        _utils.Memory.history = {}
+        _utils.Memory.exe_address = []
+        _utils.Memory.TOKEN['register']['PC'] = '0000H'
 
     def __exe(self, inst, prompt):
         for dict in self.__inst_set:

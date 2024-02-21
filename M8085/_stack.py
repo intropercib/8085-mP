@@ -46,6 +46,11 @@ class Stack:
     def __pchl(self):
         self.__register['PC'] = self.__register['H'] + self.__register['L']
     
+    def __hlt(self):
+        pass
+    
+    __rst55 = __hlt
+
     def get_inst(self):
         return {
             "PUSH": self.__push,
@@ -53,5 +58,7 @@ class Stack:
             "XTHL": self.__xthl,
             "SPHL": self.__sphl,
             "PCHL": self.__pchl,
+            "HLT":self.__hlt,
+            "RST5.5": Stack.__rst55
         }
 

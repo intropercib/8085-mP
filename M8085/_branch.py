@@ -6,31 +6,31 @@ class Branch:
         self.__flag:dict = token['flag']
         
     def __jmp(self,kywrd:str):
-        self.__register['SP'] = encode(decode(self.__register['SP']) - 1) 
+        self.__register['PC'] = kywrd 
     
     def __jc(self, kywrd:str):    
-        if self.__flag['C']: self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if self.__flag['C']: self.__register['PC'] = kywrd 
         
     def __jnc(self, kywrd:str):
-        if not self.__flag['C']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if not self.__flag['C']: self.__register['PC'] = kywrd 
     
     def __jz(self, kywrd:str):
-        if self.__flag['Z']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if self.__flag['Z']: self.__register['PC'] = kywrd 
         
     def __jnz(self, kywrd:str):
-        if not self.__flag['Z']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if not self.__flag['Z']: self.__register['PC'] = kywrd 
     
     def __jpe(self, kywrd:str):
-        if self.__flag['P']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if self.__flag['P']: self.__register['PC'] = kywrd 
         
     def __jpo(self, kywrd:str):
-        if not self.__flag['P']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if not self.__flag['P']: self.__register['PC'] = kywrd 
     
     def __jm(self, kywrd:str):
-        if self.__flag['S']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if self.__flag['S']: self.__register['PC'] = kywrd 
         
     def __jp(self, kywrd:str):
-        if not self.__flag['S']:self.__register['SP'] = encode(decode(self.__register['SP']) - 1)
+        if not self.__flag['S']: self.__register['PC'] = kywrd 
     
     def get_inst(self):
         return {
