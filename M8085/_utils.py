@@ -90,7 +90,7 @@ class Tool:
 
     def check_param(inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
-        if inst in ['HLT','RST5.5'] and prompt[0] == '': return inst
+        if inst in ['HLT','RST5.5'] and prompt[0] == '': return ''
 
         elif Tool.PARAM_RULE[inst][0] == 0 and prompt[0] != '': return 'NoArgumentError'
 
@@ -100,8 +100,9 @@ class Tool:
             elif len(prompt[0]) == 1 and prompt[0] not in Tool.TOKEN['register'].keys(): return 'RegisterError'
             elif len(prompt[0]) == 5 and prompt[0] not in Tool.TOKEN['memory'].keys(): return 'MemoryError'
             elif len(prompt[0]) == 3 and prompt[0] not in Tool.TOKEN['port'].keys(): return 'DataError'
-            elif inst in ['LDAX','STAX','INX','DCX','DAD']: 
-                if prompt[0] not in ['H','B','D']: return 'RpError'
+            elif inst in ['INX','DCX','DAD'] and prompt[0] not in ['H','B','D']: return 'RpError'
+            elif inst in ['LDAX', 'STAX'] and prompt[0] == "H": return 'RpNotAllowedError'
+            elif inst in ['LDAX', 'STAX'] and prompt[0] not in ['B','D']: return 'RpError'
             else: return prompt[0]
         else:
             if arg.find(',') == -1: return 'CommaError' 
@@ -131,7 +132,7 @@ class Tool:
         else: return Tool.TOKEN["register"]['H'] + Tool.TOKEN["register"]['L'] + 'H'
     
     def check_parity(result:str):
-        if len( [_ for _ in bin(decode(result[:-1]))[1:] if _ == '1'] ) % 2 == 0:
+        if bin(decode(result[:-1])).count('1') % 2 == 0:
             Tool.TOKEN['flag']['P'] = 1
         else:
             Tool.TOKEN['flag']['P'] = 0
