@@ -22,8 +22,10 @@ class App():
                 self.history('assistant',f'Invalid Syntax: {arg}. Should be {syntax}.')],
             'TypeError':lambda:[st.chat_message("assistant").write('TypeError: Argument(s) missing'),
                 self.history('assistant','TypeError: Argument(s) missing')],
-            'RpError': lambda arg:[st.chat_message("assistant").write(f'RpError: {arg}. Should be a vaild register pair (i.e B,C,D,E,H,L).'),
+            'RpError': lambda arg:[st.chat_message("assistant").write(f'RpError: {arg}. Should be a vaild register pair (i.e B,D,H).'),
                 self.history('assistant',f'RpError: {arg}. Should be a vaild register pair (i.e B,C,D,E,H,L).')],
+            'RpNotAllowedError': lambda arg:[st.chat_message("assistant").write(f'RpNotAllowedError: HL pair is not allowed. Should be a vaild register pair (i.e B,D).'),
+                self.history('assistant',f'RpNotAllowedError: HL pair is not allowed. Should be a vaild register pair (i.e B,D).')],
             'NoArgumentError':lambda inst:[st.chat_message("assistant").write(f'{inst} takes no argument.'),
                 self.history('assistant',f'{inst} takes no argument.')],
             'PointerError':lambda pointer:[st.chat_message("assistant").write(f'PointerError: {pointer} is not pointing to any memory address.'),
@@ -77,11 +79,14 @@ class App():
             elif status == 'PortError':self.error_msg[status](prompt)
             elif status == 'DataError':self.error_msg[status](prompt)
             elif status == 'RpError': self.error_msg[status](prompt[0])
+            elif status == 'RpNotAllowedError':self.error_msg[status]()
             elif status == 'NoArgumentError': self.error_msg['NoArgumentError'](inst)
-            elif inst in ['HLT','RST5.5']:
-                self.cu.HLT()
             else:
                 self.cu.cycle(inst,status)
+                if not self.cu.mode and inst == 'HLT':
+                    print(self.cu.assemble())
+                    self.cu.reset()
+                    self.mode = 1
 
         elif prompt_chunk[0] == 'exam':
             if prompt_chunk[1] == 'memory': 
