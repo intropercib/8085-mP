@@ -35,8 +35,8 @@ class Arithmetic:
         Tool.check_zero(self.__register['A'])         
         Tool.check_sign(self.__register['A'])         
         
-    def __adi(self,arg:list):
-        self.__register['A'] = encode(decode(self.__register['A']) +  decode(arg[0]))
+    def __adi(self,data:str):
+        self.__register['A'] = encode(decode(self.__register['A']) +  decode(data))
 
         if len(self.__register['A']) > 3:
             self.__flag['C'] = 1
@@ -62,11 +62,11 @@ class Arithmetic:
         if r == 'M':
             if decode(self.__memory_address[Tool.rp()]) > decode(self.__register['A']):
                 self.__flag['C'] = 1  
-            self.__register['A'] = encode( decode(self.__register['A'] -  decode(self.__memory_address[Tool.rp()])) )
+            self.__register['A'] = encode( abs(decode(self.__register['A'] -  decode(self.__memory_address[Tool.rp()]))) )
         else:
             if decode(self.__register[r]) > decode(self.__register['A']):
                 self.__flag['C'] = 1
-            self.__register['A'] = encode( decode(self.__register['A']) -  decode(self.__register[r]) )
+            self.__register['A'] = encode( abs(decode(self.__register['A']) -  decode(self.__register[r])) )
         
             Tool.check_parity(self.__register['A'])  
             Tool.check_zero(self.__register['A'])  

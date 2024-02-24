@@ -50,8 +50,6 @@ class Data:
             self.__register['A'] = self.__memory_address[Tool.rp('B')]
         elif rp == 'D':
             self.__register['A'] = self.__memory_address[Tool.rp('D')]
-        else:
-            self.__register['A'] = self.__memory_address[Tool.rp()]
     
     def __stax(self,rp:str):
 
@@ -59,9 +57,7 @@ class Data:
             self.__memory_address[Tool.rp('B')] = self.__register['A']
         elif rp == 'D':
             self.__memory_address[Tool.rp('D')] = self.__register['A']
-        else:
-            self.__memory_address[Tool.rp()] = self.__register['A']
-
+    
     def __lhld(self,ma:str):
         
         self.__register['L'] = self.__memory_address[ma]

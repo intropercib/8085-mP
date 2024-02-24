@@ -1,12 +1,11 @@
-from ._utils import encode,decode,Tool
+from ._utils import encode,decode
 
 class Stack:
     def __init__(self,token:dict):
         self.__stack = token['stack']
         self.__register = token['register']
-        Tool.TOKEN = token
 
-    def push(self, rp:str):
+    def __push(self, rp:str):
         if rp == 'B':
             self.__stack[self.__register['SP']] = self.__register['B']  + self.__register['C']
 
@@ -18,7 +17,7 @@ class Stack:
 
         self.__register['SP'] = encode(decode(self.__register['SP'])-1)
 
-    def pop(self,rp:str):
+    def __pop(self,rp:str):
         self.__register['SP'] = encode(decode(self.__register['SP'])+1)
         if rp == 'B':
             self.__register['B'] = self.__register['SP'][:2] 
@@ -47,12 +46,19 @@ class Stack:
     def __pchl(self):
         self.__register['PC'] = self.__register['H'] + self.__register['L']
     
+    def __hlt(self):
+        pass
+    
+    __rst55 = __hlt
+
     def get_inst(self):
         return {
-            "PUSH": self.push,
-            "POP": self.pop,
+            "PUSH": self.__push,
+            "POP": self.__pop,
             "XTHL": self.__xthl,
             "SPHL": self.__sphl,
             "PCHL": self.__pchl,
+            "HLT":self.__hlt,
+            "RST5.5": Stack.__rst55
         }
 
