@@ -8,7 +8,6 @@ st.set_page_config(page_title="8085 Simulator",page_icon="assets/icon.png")
 st.title('Welcome to 8085 Simulator')
 st.markdown("""
 This simulator allows you to interact with an emulated 8085 microprocessor.
-Type 'help' for a list of available commands or 'help <command>' for detailed information.
 
 Get started by entering commands such as 'MOV A, B' or 'LXI H, 8000H'.""")
 
