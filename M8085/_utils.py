@@ -90,7 +90,7 @@ class Tool:
 
     def check_param(inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
-        if inst in ['HLT','RST5.5'] and prompt[0] == '': return ''
+        if inst in ['HLT','RST5.5'] and prompt[0] == '': return None
 
         elif Tool.PARAM_RULE[inst][0] == 0 and prompt[0] != '': return 'NoArgumentError'
 
