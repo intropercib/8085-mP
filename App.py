@@ -68,7 +68,13 @@ class App():
 
     def scrap(self,prompt:str):
         prompt_chunk = prompt.split(" ")
-        if prompt_chunk[0] in self.cu.inst_list():
+        inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
+
+        if inst in ['JMP','JC','JNZ', 'JZ', 'JNC', 'JP', 'JM', 'JPE', 'JPO', 'CALL', 'CC', 'CNC', 'CZ', 'CNZ', 'CP', 'CM', 'CPE', 'CPO']:
+            st.chat_message("assistant").write("NotAllowed: Branch instructions are under construction.")
+            self.history("assistant","NotAllowed: Branch instructions are under construction.")
+            
+        elif inst in self.cu.inst_list():
             inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
             status = Tool.check_param(inst,param)
             if status == 'CommaError' or status == 'TypeError':self.error_msg[status]()
