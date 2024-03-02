@@ -63,7 +63,7 @@ class Interface(Cmd):
             elif status == 'NoArgumentError': self.error_msg[status](inst)
             else:
                 self.cu.cycle(inst,status)
-                if not self.cu.mode and inst == 'HLT':
+                if inst == 'HLT':
                     print(self.cu.assemble())
                     self.cu.reset()
                     self.mode = 1

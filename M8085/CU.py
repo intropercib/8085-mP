@@ -89,7 +89,7 @@ class Control_Unit:
                 inst,prompt = _utils.Memory.history[address]
                 if isinstance(prompt, tuple):
                     prompt = ','.join(prompt)
-                mnemonics = ' '.join([inst,prompt])
+                mnemonics = ' '.join([inst,prompt]) if prompt != None else inst
                 op_code = _utils.Memory.TOKEN['stack'][address]
                 byte = opcode[inst]['byte']
 
