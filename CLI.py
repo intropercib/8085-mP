@@ -48,9 +48,12 @@ class Interface(Cmd):
 
     def default(self,prompt):
         prompt_chunk = prompt.split(" ")
+        inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
 
-        if prompt_chunk[0] in self.cu.inst_list():
-            inst,param = prompt_chunk[0], ''.join(prompt_chunk[1:])
+        if inst in ['JMP','JC','JNZ', 'JZ', 'JNC', 'JP', 'JM', 'JPE', 'JPO', 'CALL', 'CC', 'CNC', 'CZ', 'CNZ', 'CP', 'CM', 'CPE', 'CPO']:
+            self.response("NotAllowed: Branch instructions are under construction.")
+
+        elif inst in self.cu.inst_list():
             status = Tool.check_param(inst,param)
             if status == 'CommaError' or status == 'TypeError':self.error_msg[status]()
             elif status == 'SyntaxError':self.error_msg[status](prompt,self.specify_msg[inst]['Syntax'])
@@ -66,8 +69,7 @@ class Interface(Cmd):
                 if inst == 'HLT':
                     print(self.cu.assemble())
                     self.cu.reset()
-                    self.mode = 1
-                    
+                    self.mode = 1             
         elif prompt_chunk[0] == 'exam':
 
             if prompt_chunk[1] == 'memory': 
