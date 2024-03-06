@@ -90,7 +90,7 @@ class Tool:
 
     def check_param(inst:str,arg:str):
         prompt = arg.upper().replace(' ', '').split(',')
-        if inst in ['HLT','RST5.5'] and prompt[0] == '': return ''
+        if inst in ['HLT','RST5.5'] and prompt[0] == '': return None
 
         elif Tool.PARAM_RULE[inst][0] == 0 and prompt[0] != '': return 'NoArgumentError'
 
@@ -104,7 +104,7 @@ class Tool:
             elif inst in ['LDAX', 'STAX'] and prompt[0] == "H": return 'RpNotAllowedError'
             elif inst in ['LDAX', 'STAX'] and prompt[0] not in ['B','D']: return 'RpError'
             else: return prompt[0]
-        else:
+        elif Tool.PARAM_RULE[inst][0] == 2:
             if arg.find(',') == -1: return 'CommaError' 
             elif any([len(prompt[0]) != Tool.PARAM_RULE[inst][1],
                   len(prompt[1]) != Tool.PARAM_RULE[inst][2]]): return 'SyntaxError'
