@@ -1,148 +1,153 @@
-from ._utils import encode, decode, Tool
-class Arithmetic:
+from ._base import Instruction
+from ._utils import encode, decode
+from ._memory import Memory, Register, Flag, decode_rp, check_parity, check_sign, check_zero
 
-    def __init__(self,token:dict):
-        Tool.TOKEN = token
-        self.__memory_address:dict = token['memory']
-        self.__register:dict = token['register']
-        self.__flag:dict = token['flag']
+class Arithmetic(Instruction):
+
+    def __init__(self):
+        self._memory:Memory = Memory()
+        self._register:Register = Register()
+        self._flag:Flag = Flag()
 
     def __add(self,r:str):
         if r == 'M':
-            self.__register['A'] = encode( decode(self.__register['A']) +  decode(self.__memory_address[Tool.rp()]) )
-        else: 
-            self.__register['A'] = encode( decode(self.__register['A']) +  decode(self.__register[r]) )
+            self._register['A'] = encode( decode(self._register['A']) +  decode( self._memory.read(decode_rp()) ) )
+        else:
+            self._register['A'] = encode( decode(self._register['A']) +  decode(self._register.read(r)) )
         
-        if len(self.__register['A']) > 3:
-            self.__flag['C'] = 1
-            self.__register['A'] = self.__register['A'][1:]
+        if len(self._register['A']) > 3:
+            self._flag['C'] = 1
+            self._register['A'] = self._register['A'][1:]
         
-        Tool.check_parity(self.__register['A']) 
-        Tool.check_zero(self.__register['A']) 
-        Tool.check_sign(self.__register['A']) 
+        check_parity(self._register['A']) 
+        check_zero(self._register['A']) 
+        check_sign(self._register['A']) 
 
     def __adc(self,r:str):
         if r == 'M':
-            self.__register['A'] = encode( decode(self.__register['A']) +  decode(self.__memory_address[Tool.rp()]) + self.__flags['C'] )
+            self._register['A'] = encode( decode(self._register['A']) +  decode(self._memory[decode_rp()]) + self._flag['C'] )
         else:
-            self.__register['A'] = encode( decode(self.__register['A']) + decode(self.__register[r]) + self.__flags['C'] )
-        
-        if len(self.__register['A']) > 3:
-            self.__flag['C'] = 1
-            self.__register['A'] = self.__register['A'][1:]
+            self._register['A'] = encode( decode(self._register['A']) + decode(self._register[r]) + self._flag['C'] )
 
-        Tool.check_parity(self.__register['A'])
-        Tool.check_zero(self.__register['A'])         
-        Tool.check_sign(self.__register['A'])         
+        if len(self._register['A']) > 3:
+            self._flag['C'] = 1
+            self._register['A'] = self._register['A'][1:]
+
+        check_parity(self._register['A'])
+        check_zero(self._register['A'])         
+        check_sign(self._register['A'])         
         
     def __adi(self,data:str):
-        self.__register['A'] = encode(decode(self.__register['A']) +  decode(data))
+        self._register['A'] = encode(decode(self._register['A']) +  decode(data))
 
-        if len(self.__register['A']) > 3:
-            self.__flag['C'] = 1
-            self.__register['A'] = self.__register['A'][1:]
+        if len(self._register['A']) > 3:
+            self._flag['C'] = 1
+            self._register['A'] = self._register['A'][1:]
         
-        Tool.check_parity(self.__register['A'])  
-        Tool.check_zero(self.__register['A']) 
-        Tool.check_sign(self.__register['A']) 
+        check_parity(self._register['A'])  
+        check_zero(self._register['A']) 
+        check_sign(self._register['A']) 
     
     def __dad(self,rp:str):
-        self.__memory_address[Tool.rp()] = encode(decode(self.__memory_address[Tool.rp()]) +  decode(self.__memory_address[Tool.rp(rp)]))
+        self._memory[decode_rp()] = encode(decode(self._memory[decode_rp()]) +  decode(self._memory[decode_rp(rp)]))
 
-        if len(self.__memory_address[Tool.rp()]) > 3:
-            self.__flag['C'] = 1
-            self.__memory_address[Tool.rp()] = self.__memory_address[Tool.rp()][1:]
+        if len(self._memory[decode_rp()]) > 3:
+            self._flag['C'] = 1
+            self._memory[decode_rp()] = self._memory[decode_rp()][1:]
         
-        Tool.check_parity(self.__memory_address[Tool.rp()]) 
-        Tool.check_zero(self.__memory_address[Tool.rp()])  
-        Tool.check_sign(self.__memory_address[Tool.rp()])  
+        check_parity(self._memory[decode_rp()]) 
+        check_zero(self._memory[decode_rp()])  
+        check_sign(self._memory[decode_rp()])  
 
     def __sub(self,r:str):
 
         if r == 'M':
-            if decode(self.__memory_address[Tool.rp()]) > decode(self.__register['A']):
-                self.__flag['C'] = 1  
-            self.__register['A'] = encode( abs(decode(self.__register['A'] -  decode(self.__memory_address[Tool.rp()]))) )
+            if decode(self._memory[decode_rp()]) > decode(self._register['A']):
+                self._flag['C'] = 1  
+            self._register['A'] = encode( abs(decode(self._register['A'] -  decode(self._memory[decode_rp()]))) )
         else:
-            if decode(self.__register[r]) > decode(self.__register['A']):
-                self.__flag['C'] = 1
-            self.__register['A'] = encode( abs(decode(self.__register['A']) -  decode(self.__register[r])) )
+            if decode(self._register[r]) > decode(self._register['A']):
+                self._flag['C'] = 1
+            self._register['A'] = encode( abs(decode(self._register['A']) -  decode(self._register[r])) )
         
-            Tool.check_parity(self.__register['A'])  
-            Tool.check_zero(self.__register['A'])  
-            Tool.check_sign(self.__register['A'])  
+            check_parity(self._register['A'])  
+            check_zero(self._register['A'])  
+            check_sign(self._register['A'])  
 
     def __sbb(self,r:str):
 
         if r == 'M':
-            if decode(self.__memory_address[Tool.rp()]) + self.__flags['C'] > decode(self.__register['A']):
-                self.__flag['C'] = 1
-            self.__register['A'] = encode( decode(self.__register['A']) - ( decode(self.__memory_address[Tool.rp()]) + self.__flags['C'] ) )
+            if decode(self._memory[decode_rp()]) + self._flag['C'] > decode(self._register['A']):
+                self._flag['C'] = 1
+            self._register['A'] = encode( decode(self._register['A']) - ( decode(self._memory[decode_rp()]) + self._flag['C'] ) )
         else:
-            if decode(self.__register[r]) + self.__flags['C'] > decode(self.__register['A']):
-                self.__flag['C'] = 1
-            self.__register['A'] = encode( decode(self.__register['A']) - ( decode(self.__register[r]) + self.__flags['C'] ) )
+            if decode(self._register[r]) + self._flag['C'] > decode(self._register['A']):
+                self._flag['C'] = 1
+            self._register['A'] = encode( decode(self._register['A']) - ( decode(self._register[r]) + self._flag['C'] ) )
         
-            Tool.check_parity(self.__register['A'])  
-            Tool.check_zero(self.__register['A'])  
-            Tool.check_sign(self.__register['A'])  
+            check_parity(self._register['A'])  
+            check_zero(self._register['A'])  
+            check_sign(self._register['A'])  
 
     def __sui(self,data:str):
-        if decode(data) > decode(self.__register['A']):
-            self.__flag['C'] = 1
-        self.__register['A'] = encode(decode(self.__register['A']) -  decode(data))
+        if decode(data) > decode(self._register['A']):
+            self._flag['C'] = 1
+        self._register['A'] = encode(decode(self._register['A']) -  decode(data))
 
-        Tool.check_parity(self.__register['A'])  
-        Tool.check_zero(self.__register['A'])  
-        Tool.check_sign(self.__register['A'])  
+        check_parity(self._register['A'])  
+        check_zero(self._register['A'])  
+        check_sign(self._register['A'])  
     
     def __sbi(self,data:str):
         rawDat = decode(data)
         idat = ((~rawDat + 1) & ((1 << len( bin(rawDat)[2:]) ) - 1)) #2's complement
-        if idat + self.__flags['C'] > decode(self.__register['A']):
-            self.__flag['C'] = 1
-        self.__register['A'] = encode(decode(self.__register['A']) - ( idat + self.__flags['C'] ))
+        if idat + self._flag['C'] > decode(self._register['A']):
+            self._flag['C'] = 1
+        self._register['A'] = encode(decode(self._register['A']) - ( idat + self._flag['C'] ))
 
-        Tool.check_parity(self.__register['A'])
-        Tool.check_zero(self.__register['A']) 
-        Tool.check_sign(self.__register['A']) 
+        check_parity(self._register['A'])
+        check_zero(self._register['A']) 
+        check_sign(self._register['A']) 
 
     def __inr(self,r:str):
 
         if r == 'M':
-            new = encode(decode(Tool.rp().replace('H','')) + 1)[:-1]
-            self.__register['H']  = new[:2]
-            self.__register['L']  = new[2:]
-            Tool.check_parity(new)
-            Tool.check_zero(new)
-            Tool.check_sign(new)
+            new = encode(decode(decode_rp().replace('H','')) + 1)[:-1]
+            self._register['H']  = new[:2]
+            self._register['L']  = new[2:]
+            check_parity(new)
+            check_zero(new)
+            check_sign(new)
 
         else:
-            self.__register[r] = encode( decode(self.__register[r]) + 1 )
-            Tool.check_parity(self.__register[r])
-            Tool.check_zero(self.__register[r])
-            Tool.check_sign(self.__register[r])
+            self._register[r] = encode( decode(self._register[r]) + 1 )
+            check_parity(self._register[r])
+            check_zero(self._register[r])
+            check_sign(self._register[r])
     
     def __inx(self,rp:str):
-        self.__memory_address[Tool.rp(rp)] = encode(decode(self.__memory_address[Tool.rp(rp)]) + 1)
+        self._memory[decode_rp(rp)] = encode(decode(self._memory[decode_rp(rp)]) + 1)
              
     def __dcx(self,rp:str):
-        self.__memory_address[Tool.rp(rp)] = encode(decode( self.__memory_address[Tool.rp(rp)] ) - 1 ) 
+        self._memory[decode_rp(rp)] = encode(decode( self._memory[decode_rp(rp)] ) - 1 ) 
     
     def __dcr(self,r:str):
 
         if r == 'M':
-            new = encode(decode(Tool.rp().replace('H','')) - 1)[:-1]
-            self.__register['H']  = new[:2]
-            self.__register['L']  = new[2:]
-            Tool.check_parity(new)
-            Tool.check_zero(new)
-            Tool.check_sign(new)
+            new = encode(decode(decode_rp().replace('H','')) - 1)[:-1]
+            self._register['H']  = new[:2]
+            self._register['L']  = new[2:]
+            check_parity(new)
+            check_zero(new)
+            check_sign(new)
         else:
-            self.__register[r] = encode( decode(self.__register[r]) - 1 )
-            Tool.check_parity(self.__register[r])
-            Tool.check_zero(self.__register[r]) 
-            Tool.check_sign(self.__register[r]) 
+            self._register[r] = encode( decode(self._register[r]) - 1 )
+            check_parity(self._register[r])
+            check_zero(self._register[r]) 
+            check_sign(self._register[r])
+
+    def __daa(self,*args): 
+        return 'Not Implemented Yet'
 
     def get_inst(self):
         return {
@@ -158,9 +163,9 @@ class Arithmetic:
             'INX':self.__inx,
             'DCX':self.__dcx,
             'DAD':self.__dad,
-            'DAA':None,
+            'DAA':self.__daa,
             'INR':self.__inr,
             'INX':self.__inx,
             'DCR':self.__dcr,
             'DCX':self.__dcx,
-        }
+        }    

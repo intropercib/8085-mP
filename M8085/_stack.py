@@ -1,50 +1,52 @@
+from ._base import Instruction
 from ._utils import encode,decode
+from ._memory import Memory, Register
 
-class Stack:
-    def __init__(self,token:dict):
-        self.__stack = token['stack']
-        self.__register = token['register']
+class Stack(Instruction):
+    def __init__(self):
+        self._stack:Memory = Memory()
+        self._register:Register = Register()
 
     def __push(self, rp:str):
         if rp == 'B':
-            self.__stack[self.__register['SP']] = self.__register['B']  + self.__register['C']
+            self._stack[self._register['SP']] = self._register['B']  + self._register['C']
 
         elif rp == 'D':
-            self.__stack[self.__register['SP']] = self.__register['D']  + self.__register['E']
+            self._stack[self._register['SP']] = self._register['D']  + self._register['E']
 
         elif rp == 'H':
-            self.__stack[self.__register['SP']] = self.__register['H']  + self.__register['L']
+            self._stack[self._register['SP']] = self._register['H']  + self._register['L']
 
-        self.__register['SP'] = encode(decode(self.__register['SP'])-1)
+        self._register['SP'] = encode(decode(self._register['SP'])-1)
 
     def __pop(self,rp:str):
-        self.__register['SP'] = encode(decode(self.__register['SP'])+1)
+        self._register['SP'] = encode(decode(self._register['SP'])+1)
         if rp == 'B':
-            self.__register['B'] = self.__register['SP'][:2] 
-            self.__register['C'] = self.__register['SP'][2:]
+            self._register['B'] = self._register['SP'][:2] 
+            self._register['C'] = self._register['SP'][2:]
 
         elif rp == 'D':
-            self.__register['D'] = self.__register['SP'][:2] 
-            self.__register['E'] = self.__register['SP'][2:]
+            self._register['D'] = self._register['SP'][:2] 
+            self._register['E'] = self._register['SP'][2:]
 
         elif rp == 'H':
-            self.__register['H'] = self.__register['SP'][:2] 
-            self.__register['L'] = self.__register['SP'][2:]
+            self._register['H'] = self._register['SP'][:2] 
+            self._register['L'] = self._register['SP'][2:]
 
-        self.__register['SP'] = encode(decode(self.__register['SP'])+1)
+        self._register['SP'] = encode(decode(self._register['SP'])+1)
 
     def __xthl(self):
-        data = self.__register['H'] + self.__register['L']
-        data, self.__stack['SP'] = self.__stack['SP'], data
+        data = self._register['H'] + self._register['L']
+        data, self._stack['SP'] = self._stack['SP'], data
 
-        self.__register['H'] = data[:2]
-        self.__register['L'] = data[2:]
+        self._register['H'] = data[:2]
+        self._register['L'] = data[2:]
 
     def __sphl(self):
-        self.__register['SP'] = self.__register['H'] + self.__register['L']
+        self._register['SP'] = self._register['H'] + self._register['L']
     
     def __pchl(self):
-        self.__register['PC'] = self.__register['H'] + self.__register['L']
+        self._register['PC'] = self._register['H'] + self._register['L']
     
     def __hlt(self):
         pass
