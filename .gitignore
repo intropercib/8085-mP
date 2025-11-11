@@ -1,6 +1,5 @@
 *.pyc
 *.vscode
-API_KEY.json
-test.py
+*.env
 tempCodeRunnerFile.py
-*packages
+Packages
