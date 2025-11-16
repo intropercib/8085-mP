@@ -1,6 +1,7 @@
-from ._utils import decode
+from ._utils import encode, decode, INSTRUCTION
 
 _MEMORY = {}
+_STACK = {}
 _REGISTER = {
     'A':'00H','B':'90H','C':'00H','D':'00H','E':'00H','H':'00H','L':'00H','M':'00H',
     'PC':'0000H','SP':'0000H'
@@ -10,9 +11,8 @@ _FLAG = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
 class Memory:
 
     def __getitem__(self,address):
-        if address in _MEMORY: 
-            return _MEMORY[address]
-        else: raise KeyError(f"Address {address} not found in memory.")
+        if address in _MEMORY: return _MEMORY[address]
+        else: return '00H'
 
     def __setitem__(self,address, data):
         if data == '00H':
@@ -86,6 +86,46 @@ class Flag:
     def reset(self):
         for flag in _FLAG:
             _FLAG[flag] = 0
+
+class ProgramCounter:
+
+    def pass1(self, line:dict):
+
+        pc = _REGISTER['PC']
+        
+        if 'label' in line:
+            label = line['label']
+            _STACK[label] = pc
+
+        if 'code' in line:
+            inst = line['inst']
+            code = line['code']
+            inr = INSTRUCTION[inst]['byte']
+
+            _STACK[pc] = code
+            _REGISTER['PC'] = encode(decode(pc) + inr, bit =4)
+        
+    def pass2(self):
+        for pc, code in _STACK.items():
+            if not isinstance(code, list):
+                continue
+            inst = code[0]
+            if INSTRUCTION[inst]['param_rule'] == ['l']:
+                label = code[1]
+                if label not in _STACK:
+                    self.reset()
+                    return f'Subroutine {label} not defined'
+                code[1] = _STACK[label]
+                _STACK[pc] = code
+
+        self.reset_pc()
+
+    def reset(self):
+        _STACK.clear()
+        self.reset_pc()
+    
+    def reset_pc(self):
+        _REGISTER['PC'] = '0000H'
 
 def decode_rp(rp:str = 'H') -> str:
     if rp == 'B': return _REGISTER['B'] + _REGISTER['C'] + 'H'
