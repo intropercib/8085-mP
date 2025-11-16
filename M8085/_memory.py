@@ -87,7 +87,7 @@ class Flag:
         for flag in _FLAG:
             _FLAG[flag] = 0
 
-class ProgramCounter:
+class Assembler:
 
     def pass1(self, line:dict):
 

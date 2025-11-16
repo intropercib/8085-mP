@@ -1,7 +1,7 @@
 import pyparsing as pp
 
 from ._utils import decode, INSTRUCTION
-from ._memory import ProgramCounter
+from ._memory import Assembler
 
 IDENTIFIER = pp.Word(pp.alphas + "_", pp.alphanums + "_")  # label
 HEX_ADDRESS = pp.Regex(r'[0-9A-F]+H') # e.g. 2000H
@@ -82,7 +82,7 @@ class Parser:
 
         self.__halt = False
 
-        self.__pc = ProgramCounter()
+        self.__pc = Assembler()
 
     def __preprocess(self):
         return filter(lambda line: line.strip() != '', self._code.splitlines())
