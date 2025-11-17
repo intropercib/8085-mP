@@ -1,5 +1,6 @@
 *.pyc
 *.vscode
 *.env
+*.log
 tempCodeRunnerFile.py
 Packages
