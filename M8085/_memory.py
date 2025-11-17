@@ -3,7 +3,7 @@ from ._utils import encode, decode, INSTRUCTION
 _MEMORY = {}
 _STACK = {}
 _REGISTER = {
-    'A':'00H','B':'90H','C':'00H','D':'00H','E':'00H','H':'00H','L':'00H','M':'00H',
+    'A':'00H','B':'00H','C':'00H','D':'00H','E':'00H','H':'00H','L':'00H','M':'00H',
     'PC':'0000H','SP':'0000H'
 }
 _FLAG = {'S':0,'Z':0,'AC':0,'P':0,'C':0}
@@ -128,24 +128,33 @@ class Assembler:
         _REGISTER['PC'] = '0000H'
 
 def decode_rp(rp:str = 'H') -> str:
-    if rp == 'B': return _REGISTER['B'] + _REGISTER['C'] + 'H'
-    elif rp == 'D': return  _REGISTER['D'] + _REGISTER['E'] + 'H'
-    else: return _REGISTER['H'] + _REGISTER['L'] + 'H'
+    if rp == 'B': return _REGISTER['B'][:-1] + _REGISTER['C']
+    elif rp == 'D': return  _REGISTER['D'][:-1] + _REGISTER['E']
+    else: return _REGISTER['H'][:-1] + _REGISTER['L']
 
-def check_parity(result:str):
-    if bin(decode(result)).count('1') % 2 == 0:
-        _FLAG['P'] = 1
-    else:
-        _FLAG['P'] = 0
+def encode_rp(value:str, rp:str = 'H'):
+    if rp == 'B':
+        _REGISTER['B'] = value[:2] + 'H'
+        _REGISTER['C'] = value[2:] 
+    elif rp == 'D':
+        _REGISTER['D'] = value[:2] + 'H'
+        _REGISTER['E'] = value[2:] 
+    elif rp == 'H':
+        _REGISTER['H'] = value[:2] + 'H'
+        _REGISTER['L'] = value[2:]
+
+def check_carry(result:str, bit:int=2):
+    if bit == 4:
+        _FLAG['C'] = int( decode(result) > 0xFFFF )
+    elif bit == 2: 
+        _FLAG['C'] = int( decode(result) > 0xFF )
+
+def check_aux_carry(op1:str, op2:str): 
+    low_nibble_sum = (decode(op1) & 0x0F) + (decode(op2) & 0x0F)
+    _FLAG['AC'] = int( low_nibble_sum > 0x0F )
+
+def check_parity(result:str): _FLAG['P'] = int( bin(decode(result)).count('1') % 2 == 0 )
     
-def check_zero(result:str):
-    if decode(result) == 0:
-        _FLAG['Z'] = 1
-    else:
-        _FLAG['Z'] = 0
+def check_zero(result:str): _FLAG['Z'] = int( decode(result) == 0 )
 
-def check_sign(result:str):
-    if decode(result) < 0:
-        _FLAG['S'] = 1
-    else:
-        _FLAG['S'] = 0
+def check_sign(result:str): _FLAG['S'] = (decode(result) >> 7) & 1
