@@ -1,6 +1,6 @@
 from ._base import Instruction
 from ._utils import decode,encode
-from ._memory import Memory,Register,Flag, check_zero,check_parity
+from ._memory import Memory,Register,Flag, check_zero,check_parity, check_sign, decode_rp
 
 class Logical(Instruction):
 
@@ -14,42 +14,34 @@ class Logical(Instruction):
         self._flag['C'] = int(accumulator_value[-1])
         rotated_value = accumulator_value[-1] + accumulator_value[:-1]
         self._register['A'] = encode(int(rotated_value,2))
-        check_parity(self._register['A']) 
-        check_zero(self._register['A']) 
 
     def __rar(self):
         accumulator_value = bin(decode(self._register['A']))[2:].zfill(8)
         rotated_value = str(self._flag['C']) + accumulator_value[:-1]
         self._flag['C'] = int(accumulator_value[-1])
         self._register['A'] = encode(int(rotated_value,2))
-        check_parity(self._register['A']) 
-        check_zero(self._register['A']) 
 
     def __rlc(self):
         accumulator_value = bin(decode(self._register['A']))[2:].zfill(8)
         rotated_value = accumulator_value[1:] + accumulator_value[0]
         self._flag['C'] = int(accumulator_value[0])
         self._register['A'] = encode(int(rotated_value,2))
-        check_parity(self._register['A']) 
-        check_zero(self._register['A']) 
 
     def __ral(self):
         accumulator_value = bin(decode(self._register['A']))[2:].zfill(8)
         rotated_value = accumulator_value[1:] + str(self._flag['C'])
         self._flag['C'] = decode(accumulator_value[0],2)
         self._register['A'] = encode(decode(rotated_value,2))
-        check_parity(self._register['A']) 
-        check_zero(self._register['A']) 
         
     def __ani(self, data:str):
         self._register['A'] = encode(decode(self._register['A']) & decode(data))
         self._flag['C'], self._flag['AC'] = 0, 1
-        check_parity(self._register['A']) 
-        check_zero(self._register['A']) 
 
     def __xri(self, data:str):
         self._register['A'] = encode(decode(self._register['A']) ^ decode(data))
         self._flag['C'], self._flag['AC'] = 0, 0
+        check_parity(self._register['A'])
+        check_zero(self._register['A'])
 
     def __ori(self, data:str):
         self._register['A'] = encode(decode(self._register['A']) | decode(data))
@@ -59,38 +51,38 @@ class Logical(Instruction):
 
     def __ana(self, r:str):
         if r == 'M':
-            self._register['A'] = encode(decode(self._register['A']) & decode(self._memory[Memory()]))
+            self._register['A'] = encode(decode(self._register['A']) & decode(self._memory[decode_rp()]))
         else:
             self._register['A'] = encode(decode(self._register['A']) & decode(self._register[r]))
-        self._register['AC'], self._register['C'] = 1, 0
+        self._flag['AC'], self._flag['C'] = 1, 0
         check_parity(self._register['A']) 
         check_zero(self._register['A']) 
 
     def __ora(self, r:str):
         if r == 'M':
-            self._register['A'] = encode(decode(self._register['A']) | decode(self._memory[Memory()]))
+            self._register['A'] = encode(decode(self._register['A']) | decode(self._memory[decode_rp()]))
         else:
             self._register['A'] = encode(decode(self._register['A']) | decode(self._register[r]))
-        self._register['AC'], self._register['C'] = 0, 0
+        self._flag['AC'], self._flag['C'] = 0, 0
         check_parity(self._register['A']) 
         check_zero(self._register['A'])
 
     def __xra(self, r:str):
         if r == 'M':
-            self._register['A'] = encode(decode(self._register['A']) ^ decode(self._memory[Memory()]))
+            self._register['A'] = encode(decode(self._register['A']) ^ decode(self._memory[decode_rp()]))
         else:
             self._register['A'] = encode(decode(self._register['A']) ^ decode(self._register[r]))
-        self._register['AC'], self._register['C'] = 0, 0
+        self._flag['AC'], self._flag['C'] = 0, 0
         check_parity(self._register['A']) 
         check_zero(self._register['A']) 
     
     def __cma(self):
-        self.__registers['A'] = encode(~decode(self.__registers['A']) & 0xFF)
+        self._register['A'] = encode(~decode(self._register['A']) & 0xFF)
 
     def __cmp(self, r:str):
         a_value = decode(self._register['A'])
         if r == "M":
-            data_value = decode(self._memory[Memory()])
+            data_value = decode(self._memory[decode_rp()])
         else:
             data_value = decode(self._register[r])
         if a_value < data_value:
@@ -103,15 +95,17 @@ class Logical(Instruction):
     def __cpi(self, data:str):
         a_value = decode(self._register['A'])
         data_value = decode(data)
-        if a_value < data_value:
-            self._flag['C'], self._flag['Z'] = 1, 0
-        elif a_value == data_value:
-            self._flag['C'], self._flag['Z'] = 0, 1
-        else:
-            self._flag['C'], self._flag['Z'] = 0, 0
-    
+        result = (a_value - data_value) & 0xFF
+
+        self._flag['C'] = 1 if a_value < data_value else 0
+        self._flag['Z'] = 1 if result == 0 else 0
+        self._flag['AC'] = 1 if (a_value & 0x0F) < (data_value & 0x0F) else 0
+
+        check_sign(result)
+        check_parity(result)
+
     def __cmc(self):
-        self._flag['C'] = encode(not self._flag['C'], 'bool')
+        self._flag['C'] = int(not self._flag['C'])
 
     def __stc(self):
         self._flag['C'] = 1

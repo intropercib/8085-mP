@@ -681,3 +681,17 @@ DAA:
   state: ["opcode", "read", "write"]
   syntax: "DAA"
   op: "27"
+
+ORG:
+  byte: 1
+  param_rule: ["m:16"]
+  state: [""]
+  syntax: "ORG 16-bit memory address"
+  op: Null
+
+DB:
+  byte: 1
+  param_rule: Null
+  state: [""]
+  syntax: "DB n1,n2,n3,... where n is an integer"
+  op: Null

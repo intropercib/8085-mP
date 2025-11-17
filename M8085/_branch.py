@@ -11,37 +11,36 @@ class Branch(Instruction):
         self._register['PC'] = address
 
     def __jc(self,address:str):
-        if self._flag['C'] == 1:
-            self._register['PC'] = address
+        if self._flag['C'] == 1: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __jnc(self,address:str):
-        if self._flag['C'] == 0:
-            self._register['PC'] = address
+        if self._flag['C'] == 0: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
     
     def __jz(self,address:str):
-        if self._flag['Z'] == 1:
-            self._register['PC'] = address
+        if self._flag['Z'] == 1: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __jnz(self,address:str):
-        print(self._flag['Z'])
-        if self._flag['Z'] == 0:
-            self._register['PC'] = address
+        if self._flag['Z'] == 0: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __jp(self,address:str):
-        if self._flag['S'] == 0:
-            self._register['PC'] = address
+        if self._flag['S'] == 0: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __jm(self,address:str):
-        if self._flag['S'] == 1:
-            self._register['PC'] = address
+        if self._flag['S'] == 1: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
     
     def __jpe(self,address:str):
-        if self._flag['P'] == 1:
-            self._register['PC'] = address
+        if self._flag['P'] == 1: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __jpo(self,address:str):
-        if self._flag['P'] == 0:
-            self._register['PC'] = address
+        if self._flag['P'] == 0: self._register['PC'] = address
+        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
 
     def __call(self,address:str):
         self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)

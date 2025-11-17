@@ -1,6 +1,6 @@
 from ._base import Instruction
 from ._utils import encode,decode
-from ._memory import Memory, Register
+from ._memory import Memory, Register, decode_rp, encode_rp
 
 class Stack(Instruction):
     def __init__(self):
@@ -8,45 +8,34 @@ class Stack(Instruction):
         self._register:Register = Register()
 
     def __push(self, rp:str):
-        if rp == 'B':
-            self._stack[self._register['SP']] = self._register['B']  + self._register['C']
-
-        elif rp == 'D':
-            self._stack[self._register['SP']] = self._register['D']  + self._register['E']
-
-        elif rp == 'H':
-            self._stack[self._register['SP']] = self._register['H']  + self._register['L']
-
         self._register['SP'] = encode(decode(self._register['SP'])-1)
+        self._stack[self._register['SP']] = decode_rp(rp=rp)
 
     def __pop(self,rp:str):
-        self._register['SP'] = encode(decode(self._register['SP'])+1)
-        if rp == 'B':
-            self._register['B'] = self._register['SP'][:2] 
-            self._register['C'] = self._register['SP'][2:]
-
-        elif rp == 'D':
-            self._register['D'] = self._register['SP'][:2] 
-            self._register['E'] = self._register['SP'][2:]
-
-        elif rp == 'H':
-            self._register['H'] = self._register['SP'][:2] 
-            self._register['L'] = self._register['SP'][2:]
-
+        encode_rp(value=self._stack[self._register['SP']], rp=rp)
         self._register['SP'] = encode(decode(self._register['SP'])+1)
 
     def __xthl(self):
-        data = self._register['H'] + self._register['L']
-        data, self._stack['SP'] = self._stack['SP'], data
-
-        self._register['H'] = data[:2]
-        self._register['L'] = data[2:]
+        data = decode_rp(rp='H')
+        data, self._register['SP'] = self._register['SP'], data
+        encode_rp(data,rp='H')
 
     def __sphl(self):
-        self._register['SP'] = self._register['H'] + self._register['L']
+        self._register['SP'] = decode_rp(rp='H')
     
     def __pchl(self):
-        self._register['PC'] = self._register['H'] + self._register['L']
+        self._register['PC'] = decode_rp(rp='H')
+
+    def __org(self,addr):
+        self._stack['IDX'] = addr
+    
+    def __db(self,*arg):
+        if self._stack['IDX'] == '00H':
+            self._stack['IDX'] = 'C000H'
+        for num in arg:
+            curr = self._stack['IDX']
+            self._stack[curr] = num
+            self._stack['IDX'] = encode( ( decode(curr) + 1 ) & 0xffff, bit=4 )
     
     def __hlt(self):
         pass
@@ -60,7 +49,8 @@ class Stack(Instruction):
             "XTHL": self.__xthl,
             "SPHL": self.__sphl,
             "PCHL": self.__pchl,
-            "HLT":self.__hlt,
-            "RST5.5": Stack.__rst55
+            "ORG": self.__org,
+            "DB": self.__db,
+            "HLT": self.__hlt,
+            "RST5.5": Stack.__rst55,
         }
-
