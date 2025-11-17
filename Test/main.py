@@ -2,7 +2,7 @@ from pathlib import Path
 
 PATH = Path(__file__).parent / 'Programs'
 
-with open(PATH / 'test_db.asm', 'r') as file:
+with open(PATH / 'program4.asm', 'r') as file:
     program1 = file.read()
 
     print(program1)
@@ -19,3 +19,6 @@ parsed_program1 = parser.parse()
 process = Processor(program1)
 
 print(process.execute())
+print(Register().get_all())
+print(Flag().get_all())
+print(Memory().get_used_addresses())

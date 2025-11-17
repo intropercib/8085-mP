@@ -8,12 +8,12 @@ class Stack(Instruction):
         self._register:Register = Register()
 
     def __push(self, rp:str):
-        self._register['SP'] = encode(decode(self._register['SP'])-1)
+        self._register['SP'] = encode(decode(self._register['SP'])-1, bit=4)
         self._stack[self._register['SP']] = decode_rp(rp=rp)
 
     def __pop(self,rp:str):
         encode_rp(value=self._stack[self._register['SP']], rp=rp)
-        self._register['SP'] = encode(decode(self._register['SP'])+1)
+        self._register['SP'] = encode(decode(self._register['SP'])+1, bit=4)
 
     def __xthl(self):
         data = decode_rp(rp='H')

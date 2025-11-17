@@ -143,18 +143,28 @@ def encode_rp(value:str, rp:str = 'H'):
         _REGISTER['H'] = value[:2] + 'H'
         _REGISTER['L'] = value[2:]
 
-def check_carry(result:str, bit:int=2):
+def check_carry(result:str | int, bit:int=2):
+    if isinstance(result, str):
+        result = decode(result)
     if bit == 4:
-        _FLAG['C'] = int( decode(result) > 0xFFFF )
+        _FLAG['C'] = int( result > 0xFFFF )
     elif bit == 2: 
-        _FLAG['C'] = int( decode(result) > 0xFF )
+        _FLAG['C'] = int( result > 0xFF )
 
-def check_aux_carry(op1:str, op2:str): 
-    low_nibble_sum = (decode(op1) & 0x0F) + (decode(op2) & 0x0F)
+def check_aux_carry(op1:str | int, op2:str | int):
+    if isinstance(op1, str): op1 = decode(op1)
+    if isinstance(op2, str): op2 = decode(op2)
+    low_nibble_sum = (op1 & 0x0F) + (op2 & 0x0F)
     _FLAG['AC'] = int( low_nibble_sum > 0x0F )
 
-def check_parity(result:str): _FLAG['P'] = int( bin(decode(result)).count('1') % 2 == 0 )
+def check_parity(result:str | int): 
+    if isinstance(result, str): result = decode(result)
+    _FLAG['P'] = int( bin(result).count('1') % 2 == 0 )
     
-def check_zero(result:str): _FLAG['Z'] = int( decode(result) == 0 )
+def check_zero(result:str | int):
+    if isinstance(result, str): result = decode(result)
+    _FLAG['Z'] = int( result == 0 )
 
-def check_sign(result:str): _FLAG['S'] = (decode(result) >> 7) & 1
+def check_sign(result:str | int):
+    if isinstance(result, str): result = decode(result)
+    _FLAG['S'] = (result >> 7) & 1

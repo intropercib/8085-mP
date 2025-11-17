@@ -5,11 +5,11 @@
 	
 LOOP:
 	MOV A, M                     ; Load value at current location into A
-	ANI 0F                       ; Extract lower nibble (A) by masking
+	ANI 0FH                       ; Extract lower nibble (A) by masking
 	MOV B, A
 	
 	MOV A, M                     ; Load A with original value, extract upper nibble
-	ANI F0
+	ANI F0H
 	
 	RLC                          ; Shift upper nibble left by 4 positions
 	RLC

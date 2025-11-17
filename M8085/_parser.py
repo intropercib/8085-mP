@@ -1,6 +1,6 @@
 import pyparsing as pp
 
-from ._utils import decode, INSTRUCTION
+from ._utils import encode, decode, INSTRUCTION
 from ._memory import Assembler
 
 IDENTIFIER = pp.Word(pp.alphas + "_", pp.alphanums + "_")  # label
@@ -172,4 +172,4 @@ class Parser:
             return Message('Invalid Input',inst,'',line,
                     tag='db',format=INSTRUCTION['DB']['syntax']
                 )
-        else: return inst, [inst] + operand 
+        else: return inst, [inst] + [encode(_) for _ in operand if 0 <= _ <= 255] 
