@@ -27,11 +27,15 @@ Before running the Packages, ensure that you have the required Python modules in
 ```bash
 pip install -r requirements.txt
 ```
+## Checklist:
+- Test cases Programs added: 49 + 5
+- Tests on Parser class.
+- Tests on Assembler class.
+- Core logic implementation on subroutine and branching statements.
+- ORG and DB implementation.
 
 ## Working On:
-
-- Adding test cases for parsing for all instructions cases.
-- Implementing core logic on branching statements.
+- Adding test cases for every features of M8085.
 - Building CLI With rich library for better visualization.
 
 ## Contributing
