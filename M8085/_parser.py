@@ -14,7 +14,7 @@ PORT_RANGE:range = range(256)
 
 class Message:
     def __init__(
-        self, msg:str, inst:str, pos:str, line:str, tag:str = None, format:str = None
+        self, msg:str, inst:str, pos:str, line:str, tag = None, format = None
         ) -> str:        
         self.msg = msg
         self.inst = inst
@@ -31,7 +31,8 @@ class Message:
         'm:16': '16-bit Memory Address is reserved or out of range',
         'r': 'Invalid Register Used',
         'rp': 'Invalid Register Pair Used',
-        'l': 'Undefined Label Reference'
+        'l': 'Undefined Label Reference',
+        'db': 'Invalid integer value'
         }
 
         self.general = f'{msg.get(self.tag)}. at {self.pos} -> {self.line}'
@@ -77,7 +78,8 @@ class Parser:
         'm:16': self.__check_addr16,
         'r': self.__check_register,
         'l': self.__check_reference,
-        'rp': self.__check_rp
+        'rp': self.__check_rp,
+        'db': self.__check_db
         }
 
         self.__halt = False
@@ -132,11 +134,23 @@ class Parser:
                         syntax = INSTRUCTION[inst]['syntax']
                         return Message('Invalid',inst,line['pos'],line['line'],tag=rule,format=syntax)
             
+            if code[0] == 'DB':
+                result = self._operand.get('db')(line['line'])
+                if isinstance(result, Message): return result
+                else:
+                    line['inst'], line['code'] = result
+        
         self.__pc.pass1(line)
 
-    def __check_addr8(self,operand:str): return decode(operand) in PORT_RANGE
+    def __check_addr8(self,operand:str): 
+        if len(operand) == 3 and operand.endswith('H'):
+            return decode(operand) in PORT_RANGE
+        return False
 
-    def __check_addr16(self,operand:str): return decode(operand) in MEMORY_RANGE
+    def __check_addr16(self,operand:str): 
+        if len(operand) == 5 and operand.endswith('H'):
+            return decode(operand) in MEMORY_RANGE
+        return False
 
     def __check_register(self,operand:str): 
         try:
@@ -147,3 +161,15 @@ class Parser:
     def __check_reference(self,operand:str): return self._code.find(operand) != -1
 
     def __check_rp(self,operand:str): return operand in ['B','D','H']
+
+    def __check_db(self,operand:str):
+        line = operand
+        split = operand.split(' ')
+        inst, operand = split[0], split[1:]
+        try:
+            operand = [int(_) for _ in operand[0].split(',')]
+        except ValueError:
+            return Message('Invalid Input',inst,'',line,
+                    tag='db',format=INSTRUCTION['DB']['syntax']
+                )
+        else: return inst, [inst] + operand 
