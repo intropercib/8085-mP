@@ -1,31 +1,21 @@
-"""
-Author: Girisakar365
-
-Test harness for the M8085.Parser module.
-This module loads test cases from a YAML file named 'test_cases.yml' located
-in the same directory as the test module, instantiates M8085.Parser for each
-test case, and prints a divider, the test case identifier, and the parser's
-result for manual inspection.
-
-Intended use:
-- Place test_cases.yml next to this file.
-- Run the module to execute all listed test cases and observe printed output.
-"""
-
 from pathlib import Path
-import yaml
 
 from M8085 import Parser
 
 from M8085._utils import decode, INSTRUCTION
+from M8085._memory import _STACK, Assembler
 
+PATH = Path(__file__).parent.parent / 'Programs'
 
-PATH = Path(__file__).parent / 'test_cases.yml'
-
-with open(PATH, 'r') as file:
-    test_cases = yaml.safe_load(file)
-
-    test = test_cases['test1']
+with open(PATH / 'test_db.asm', 'r') as file:
+    test = file.read()
+    print(test)
     parser = Parser(test)
 
-    print(parser.structure)
+    print(parser.parse())
+
+    print(_STACK)
+    pc = Assembler()
+    pc.pass2()
+
+    print(_STACK)
