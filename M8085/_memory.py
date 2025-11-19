@@ -1,4 +1,4 @@
-from ._utils import encode, decode, INSTRUCTION
+from ._utils import encode, decode, operate, INSTRUCTION
 
 _MEMORY = {}
 _STACK = {}
@@ -12,7 +12,10 @@ class Memory:
 
     def __getitem__(self,address):
         if address in _MEMORY: return _MEMORY[address]
-        else: return '00H'
+        else:
+            addr = decode(address)  # Validate address
+            if isinstance(addr, int): return '00H'
+            else: return addr
 
     def __setitem__(self,address, data):
         if data == '00H':
@@ -123,9 +126,48 @@ class Assembler:
     def reset(self):
         _STACK.clear()
         self.reset_pc()
+        self.reset_sp()
+    
+    def reset_sp(self):
+        _REGISTER['SP'] = '0000H'
     
     def reset_pc(self):
         _REGISTER['PC'] = '0000H'
+
+def stack() -> list:
+    sck = []
+    label_flag = False
+    for i in _STACK:
+        if isinstance(_STACK[i], str): 
+            sck.append([_STACK[i],i])
+            label_flag = True
+        
+        elif isinstance(_STACK[i], list):
+            inst, *code = _STACK[i]
+            if inst in ['DB','ORG']: continue
+            byte = str(INSTRUCTION[inst]['byte'])
+        
+            if inst == 'MOV':
+                param = ','.join(code)
+                opcode = INSTRUCTION[inst][param]
+            else:
+                try:
+                    opcode = INSTRUCTION[inst]['op']
+                except KeyError:
+                    opcode = INSTRUCTION[inst][code[0]]
+            
+            if label_flag:
+                sck[-1].extend( [inst,opcode,byte,'-'] )
+                label_flag = False
+            else: sck.append( [i,'-',inst,opcode,byte,'-'] )
+            if int(byte) == 3:
+                ldat, hdat = code[-1][2:], code[-1][:2] + 'H'
+                sck.append( [operate(i,1,bit=4)] + ['-'] *4 + [ldat] )
+                sck.append( [operate(i,2,bit=4)] + ['-'] *4 + [hdat] )
+            elif int(byte) == 2:
+                sck.append( [operate(i,1,bit=4)] + ['-'] *4 + [code[-1]] )
+            
+    return sck
 
 def decode_rp(rp:str = 'H') -> str:
     if rp == 'B': return _REGISTER['B'][:-1] + _REGISTER['C']

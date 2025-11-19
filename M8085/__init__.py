@@ -1,5 +1,5 @@
 from ._parser import Parser, Message
-from ._utils import decode, encode, INSTRUCTION
+from ._utils import operate, INSTRUCTION
 from ._arithmetic import Arithmetic
 from ._data import Data
 from ._logical import Logical
@@ -7,10 +7,10 @@ from ._peripheral import Peripheral
 from ._stack import Stack
 from ._branch import Branch
 from ._timing import TimingDiagram
-from ._memory import Memory, Register, Flag, Assembler, _STACK
+from ._memory import Memory, Register, Flag, Assembler, _STACK, stack
 from .logs import setup_logger, info
 
-RUNTIME = 1000
+RUNTIME = 10000
 setup_logger()
 
 class Processor:
@@ -60,60 +60,42 @@ class Processor:
         if isinstance(result, str):
             return result
         
-        
         while True:
-            
-            
+
             if self.__rt > RUNTIME:
-                return "Runtime exceeded"
+                return Message("Runtime exceeded")
 
-            pc = self.__register['PC']
-
-            inst , *code = _STACK[pc]
-
-            if inst == 'HLT':
-                break
-
-            self.inst[inst]( *code )
-
-            if isinstance(self.inst[inst].__self__, Branch):
-                self.__rt += 1
+            try: # Handle No Return cases
+                pc = self.__register['PC']
+                inst , *code = _STACK[pc]
                 info(f"{pc} {inst} {code}")
-                continue
-
+            
+            except KeyError:
+                return Message('Infinite Loop Detected. No return instruction found!')
+            
             else:
-                inr = INSTRUCTION[inst]['byte']
-                self.__register['PC'] = encode (decode(self.__register['PC']) + inr, 4)
-                info(f"{pc} {inst} {code}")
+                inst , *code = _STACK[pc]
+
+                if inst == 'HLT':
+                    break
+
+                self.inst[inst]( *code )
+
+                if isinstance(self.inst[inst].__self__, Branch):
+                    self.__rt += 1
+                    info(f"{pc} {inst} {code}")
+                    continue
+
+                else:
+                    inr = INSTRUCTION[inst]['byte']
+                    self.__register['PC'] = operate(self.__register['PC'],inr, bit=4)                
                 self.__rt += 1
-        
-            # try: # Handle No Return cases
-            #     pc = self.__register['PC']
-            #     inst , *code = _STACK[pc]
-            #     info(f"{pc} {inst} {code}")
-            #     return 'Infinte Loop Detected'
             
-            # except KeyError:
-            #     break
-
-            # else:
-            #     inst , *code = _STACK[pc]
-
-            #     if inst == 'HLT':
-            #         break
-
-            #     self.inst[inst]( *code )
-
-            #     if isinstance(self.inst[inst].__self__, Branch):
-            #         continue
-
-            #     else:
-            #         inr = INSTRUCTION[inst]['byte']
-            #         self.__register['PC'] = encode (decode(self.__register['PC']) + inr, 4)
-            #         print(self.__register['PC'])
-                
-            #     self.__rt += 1
-            
-            # info(f"{pc} {inst} {code}")
+            info(f"{pc} {inst} {code}")
         
         self.__rt = 0
+        return 0
+    
+__all__ = [
+    "Processor","Memory","Register","Flag","Message", "Assembler","stack"
+]

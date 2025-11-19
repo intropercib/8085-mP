@@ -1,5 +1,6 @@
 from ._base import Instruction
-from ._memory import Register, Flag, encode, decode
+from ._memory import Register, Flag
+from ._utils import operate
 
 class Branch(Instruction):
     
@@ -12,78 +13,76 @@ class Branch(Instruction):
 
     def __jc(self,address:str):
         if self._flag['C'] == 1: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
 
     def __jnc(self,address:str):
         if self._flag['C'] == 0: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
     
     def __jz(self,address:str):
         if self._flag['Z'] == 1: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
 
     def __jnz(self,address:str):
         if self._flag['Z'] == 0: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
-
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
     def __jp(self,address:str):
         if self._flag['S'] == 0: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
 
     def __jm(self,address:str):
         if self._flag['S'] == 1: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
     
     def __jpe(self,address:str):
         if self._flag['P'] == 1: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
-
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
     def __jpo(self,address:str):
         if self._flag['P'] == 0: self._register['PC'] = address
-        else: self._register['PC'] = encode( decode(self._register['PC']) + 3, 4)
+        else: self._register['PC'] = operate(self._register['PC'], 3, bit=4)
 
     def __call(self,address:str):
-        self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+        self._register['SP'] = operate(self._register['PC'], 3, bit=4)
         self._register['PC'] = address
     
     def __cc(self,address:str):
         if self._flag['C'] == 1:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
 
     def __cnc(self,address:str):
         if self._flag['C'] == 0:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
 
     def __cz(self,address:str):
         if self._flag['Z'] == 1:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
     
     def __cnz(self,address:str):
         if self._flag['Z'] == 0:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
 
     def __cp(self,address:str):
         if self._flag['S'] == 0:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
 
     def __cm(self,address:str):
         if self._flag['S'] == 1:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
 
     def __cpe(self,address:str):
         if self._flag['P'] == 1:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
     
     def __cpo(self,address:str):
         if self._flag['P'] == 0:
-            self._register['SP'] = encode( decode(self._register['PC']) + 3, 4)
+            self._register['SP'] = operate(self._register['PC'], 3, bit=4)
             self._register['PC'] = address
     
     def __ret(self):

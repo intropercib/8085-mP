@@ -14,15 +14,16 @@ PORT_RANGE:range = range(256)
 
 class Message:
     def __init__(
-        self, msg:str, inst:str, pos:str, line:str, tag = None, format = None
-        ) -> str:        
+        self, msg=None, inst=None, pos=None, line=None, tag=None, format=None
+        ) -> str:
         self.msg = msg
         self.inst = inst
         self.pos = pos
         self.line = line
         self.format = format
         self.tag = tag
-        self.general = f'{self.msg} for {self.inst} at {self.pos} -> {self.line}'
+        self.general = ''
+        # self.general = f'{self.msg} for {self.inst} at {self.pos} -> {self.line}'
 
     def __tag_map(self) -> str:
 
@@ -35,18 +36,28 @@ class Message:
         'db': 'Invalid integer value'
         }
 
-        self.general = f'{msg.get(self.tag)}. at {self.pos} -> {self.line}'
+        self.general = f'{msg.get(self.tag)}.'
 
     def __str__(self) -> str:
-        if self.tag:
+        if self.msg:
+            self.general = f'{self.msg}.'
+        elif self.tag:
             self.__tag_map()
 
+        if self.inst:
+            self.general += f' Instruction: {self.inst}.'
+        if self.pos:
+            self.general += f' at {self.pos}.'
+        if self.line:
+            self.general += f' -> {self.line}.'
         if self.format:
             self.general += f'\nHint: {self.format}'
 
-        if self.inst == 'HLT': return f'Infinite Execution Detected. No HLT instruction found.'
-
         return self.general
+
+    def __iter__(self):
+        self.__str__()
+        yield from self.general
 
 class Parser:
 
@@ -108,9 +119,9 @@ class Parser:
                     expected = INSTRUCTION[key]['syntax']
                     return Message('Invalid Syntax',key,f'line: {idx}',p.line,format=expected)
                 else:
-                    return Message('Invalid Syntax',p.found,f'line: {idx}',p.line)
+                    return Message('Invalid Syntax',p.found,f'{idx}',p.line)
         
-        if not self.__halt: return Message('','HLT','','')
+        if not self.__halt: return Message('Infinite Execution Detected. No HLT instruction found.')
 
     def _param_check(self,line:dict[str:str]):
         if 'inst' in line:
@@ -169,7 +180,7 @@ class Parser:
         try:
             operand = [int(_) for _ in operand[0].split(',')]
         except ValueError:
-            return Message('Invalid Input',inst,'',line,
+            return Message('Invalid Input',inst,line=line,
                     tag='db',format=INSTRUCTION['DB']['syntax']
                 )
         else: return inst, [inst] + [encode(_) for _ in operand if 0 <= _ <= 255] 
