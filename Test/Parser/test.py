@@ -3,7 +3,7 @@ from pathlib import Path
 from M8085 import Parser
 
 from M8085._utils import decode, INSTRUCTION
-from M8085._memory import _STACK, Assembler
+from M8085._memory import _STACK, Assembler, stack
 
 PATH = Path(__file__).parent.parent / 'Programs'
 
@@ -14,8 +14,8 @@ with open(PATH / 'test_db.asm', 'r') as file:
 
     print(parser.parse())
 
-    print(_STACK)
+    # print(_STACK)
     pc = Assembler()
     pc.pass2()
 
-    print(_STACK)
+    print(stack())
