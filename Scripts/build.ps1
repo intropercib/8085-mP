@@ -24,6 +24,32 @@ Write-Host "Backend Dir:  $BACKEND_DIR"
 Write-Host "Resources:    $RESOURCES_DIR"
 Write-Host ""
 
+# Ensure a project-root virtualenv exists and install requirements there
+$VENV_DIR = Join-Path $PROJECT_ROOT ".venv"
+if (-not (Test-Path $VENV_DIR)) {
+    Write-Host "Creating virtualenv at $VENV_DIR"
+    python -m venv $VENV_DIR
+} else {
+    Write-Host "Using existing virtualenv at $VENV_DIR"
+}
+
+# Try to activate the venv (PowerShell activation)
+$activateScript = Join-Path $VENV_DIR "Scripts\Activate.ps1"
+if (Test-Path $activateScript) {
+    & $activateScript
+} else {
+    Write-Host "Warning: Activate script not found at $activateScript — continuing without activation"
+}
+
+Write-Host "Upgrading pip and installing project requirements (if present)"
+& python -m pip install --upgrade pip
+$reqPath = Join-Path $PROJECT_ROOT "requirements.txt"
+if (Test-Path $reqPath) {
+    & python -m pip install -r $reqPath
+} else {
+    Write-Host "Warning: requirements.txt not found at $reqPath — continuing"
+}
+
 # Clean old builds
 Write-Host "Cleaning old builds..."
 $pathsToClean = @(

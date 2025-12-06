@@ -41,9 +41,9 @@
 			"extensions": [
 				"maziac.asm-code-lens"
 			],
-			"settings": {
-				"python.defaultInterpreterPath": "${workspaceFolder}/Backend/.venv/bin/python"
-			}
+				"settings": {
+					"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
+				}
 		}
 	}
 

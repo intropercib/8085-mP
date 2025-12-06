@@ -71,35 +71,36 @@ if not exist "%PROJECT_ROOT%\package.json" (
 )
 echo   √ package.json found
 
-:: Check if requirements.txt exists
-if not exist "%BACKEND_DIR%\requirements.txt" (
-    echo X Error: requirements.txt not found in Backend directory
+:: Check if requirements.txt exists in project root (moved)
+if not exist "%PROJECT_ROOT%\requirements.txt" (
+    echo X Error: requirements.txt not found in project root: %PROJECT_ROOT%\requirements.txt
     exit /b 1
 )
-echo   √ requirements.txt found
+echo   √ requirements.txt found in project root
 
 :: ----- Backend Setup -----
 echo.
 echo [2/6] Setting up Python virtual environment...
-cd /d "%BACKEND_DIR%" || (
-    echo X Failed to navigate to Backend directory
+set "VENV_DIR=%PROJECT_ROOT%\.venv"
+cd /d "%PROJECT_ROOT%" || (
+    echo X Failed to navigate to project directory
     exit /b 1
 )
 
-if not exist ".venv" (
-    python -m venv .venv || (
-        echo X Failed to create virtual environment
+if not exist "%VENV_DIR%" (
+    python -m venv "%VENV_DIR%" || (
+        echo X Failed to create virtual environment at %VENV_DIR%
         exit /b 1
     )
-    echo   √ Virtual environment created
+    echo   √ Virtual environment created at %VENV_DIR%
 ) else (
-    echo   √ Virtual environment already exists
+    echo   √ Virtual environment already exists at %VENV_DIR%
 )
 
 echo.
 echo [3/6] Activating virtual environment...
-call .venv\Scripts\activate.bat || (
-    echo X Failed to activate virtual environment
+call "%VENV_DIR%\Scripts\activate.bat" || (
+    echo X Failed to activate virtual environment at %VENV_DIR%
     exit /b 1
 )
 echo   √ Virtual environment activated
@@ -110,8 +111,8 @@ pip install --upgrade pip -q || (
     echo X Failed to upgrade pip
     exit /b 1
 )
-pip install -r requirements.txt -q || (
-    echo X Failed to install Python dependencies
+pip install -r "%PROJECT_ROOT%\requirements.txt" -q || (
+    echo X Failed to install Python dependencies from %PROJECT_ROOT%\requirements.txt
     exit /b 1
 )
 echo   √ Python dependencies installed

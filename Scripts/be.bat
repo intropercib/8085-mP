@@ -8,11 +8,8 @@ set "SCRIPT_DIR=%SCRIPT_DIR:~0,-1%"
 :: Navigate to the project root (parent of Scripts folder)
 for %%i in ("%SCRIPT_DIR%") do set "PROJECT_ROOT=%%~dpi"
 set "PROJECT_ROOT=%PROJECT_ROOT:~0,-1%"
-:: Backend folder
-set "BACKEND_DIR=%PROJECT_ROOT%\Backend"
-
-cd /d "%BACKEND_DIR%" || (
-    echo Failed to navigate to Backend directory
+cd /d "%PROJECT_ROOT%" || (
+    echo Failed to navigate to project directory
     exit /b 1
 )
 
