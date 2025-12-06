@@ -22,6 +22,25 @@ echo "Backend Dir:  $BACKEND_DIR"
 echo "Resources:    $RESOURCES_DIR"
 echo ""
 
+# Setup a project-root virtual environment so build dependencies
+# (like Nuitka) can be installed and used reproducibly.
+VENV_DIR="$PROJECT_ROOT/.venv"
+if [ ! -d "$VENV_DIR" ]; then
+    echo "🛠 Creating virtualenv at $VENV_DIR"
+    python3 -m venv "$VENV_DIR" || { echo "❌ Failed to create venv at $VENV_DIR"; exit 1; }
+else
+    echo "ℹ️  Using existing virtualenv at $VENV_DIR"
+fi
+# shellcheck source=/dev/null
+source "$VENV_DIR/bin/activate"
+python -m pip install --upgrade pip
+if [ -f "$PROJECT_ROOT/requirements.txt" ]; then
+    echo "📦 Installing Python requirements from $PROJECT_ROOT/requirements.txt"
+    python -m pip install -r "$PROJECT_ROOT/requirements.txt"
+else
+    echo "⚠️  No requirements.txt found at $PROJECT_ROOT/requirements.txt — continuing"
+fi
+
 # Clean old builds
 echo "🧹 Cleaning old builds..."
 rm -rf "$BACKEND_DIR/$OUTPUT_DIR" "$BACKEND_DIR/build" "$BACKEND_DIR"/*.dist "$BACKEND_DIR"/*.build 2> /dev/null || true
@@ -31,10 +50,10 @@ echo ""
 
 cd "$BACKEND_DIR"
 
-# Check if Nuitka is installed
-if ! python3 -m nuitka --version > /dev/null 2>&1; then
-    echo "❌ Error: Nuitka is not installed."
-    echo "   Install it with: pip install nuitka"
+# Check if Nuitka is installed (use venv python)
+if ! python -m nuitka --version > /dev/null 2>&1; then
+    echo "❌ Error: Nuitka is not installed in the active Python environment."
+    echo "   Install it with: python -m pip install nuitka"
     exit 1
 fi
 
@@ -47,8 +66,8 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     fi
 fi
 
-# Build with Nuitka
-python3 -m nuitka \
+# Build with Nuitka (uses active Python from venv)
+python -m nuitka \
   --standalone \
   --onefile \
   --follow-imports \

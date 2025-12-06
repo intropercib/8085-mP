@@ -65,34 +65,34 @@ if [ ! -f "$PROJECT_ROOT/package.json" ]; then
 fi
 echo "  ✓ package.json found"
 
-# Check if requirements.txt exists
-if [ ! -f "$BACKEND_DIR/requirements.txt" ]; then
-    echo "❌ Error: requirements.txt not found in Backend directory"
+# Check if requirements.txt exists in project root (moved)
+if [ ! -f "$PROJECT_ROOT/requirements.txt" ]; then
+    echo "❌ Error: requirements.txt not found in project root: $PROJECT_ROOT/requirements.txt"
     exit 1
 fi
-echo "  ✓ requirements.txt found"
+echo "  ✓ requirements.txt found in project root"
 
 # ----- Backend Setup -----
 echo ""
 echo "[2/6] Setting up Python virtual environment..."
-cd "$BACKEND_DIR" || { echo "❌ Failed to navigate to Backend directory"; exit 1; }
-
-if [ ! -d ".venv" ]; then
-    python3 -m venv .venv || { echo "❌ Failed to create virtual environment"; exit 1; }
-    echo "  ✓ Virtual environment created"
+# Create venv in project root so requirements in project root are used
+VENV_DIR="$PROJECT_ROOT/.venv"
+if [ ! -d "$VENV_DIR" ]; then
+    python3 -m venv "$VENV_DIR" || { echo "❌ Failed to create virtual environment at $VENV_DIR"; exit 1; }
+    echo "  ✓ Virtual environment created at $VENV_DIR"
 else
-    echo "  ✓ Virtual environment already exists"
+    echo "  ✓ Virtual environment already exists at $VENV_DIR"
 fi
 
 echo ""
 echo "[3/6] Activating virtual environment..."
-source .venv/bin/activate || { echo "❌ Failed to activate virtual environment"; exit 1; }
+source "$VENV_DIR/bin/activate" || { echo "❌ Failed to activate virtual environment at $VENV_DIR"; exit 1; }
 echo "  ✓ Virtual environment activated"
 
 echo ""
 echo "[4/6] Installing Python dependencies..."
 pip install --upgrade pip -q || { echo "❌ Failed to upgrade pip"; exit 1; }
-pip install -r requirements.txt -q || { echo "❌ Failed to install Python dependencies"; exit 1; }
+pip install -r "$PROJECT_ROOT/requirements.txt" -q || { echo "❌ Failed to install Python dependencies from $PROJECT_ROOT/requirements.txt"; exit 1; }
 echo "  ✓ Python dependencies installed"
 
 # ----- Frontend Setup -----

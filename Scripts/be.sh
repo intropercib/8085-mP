@@ -2,14 +2,15 @@
 
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Navigate to the project root (parent of Scripts folder)
+# Project root is the parent of the `Scripts` folder
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-# Navigate to Backend folder
-BACKEND_DIR="$PROJECT_ROOT/Backend"
 
-cd "$BACKEND_DIR" || { echo "Failed to navigate to Backend directory"; exit 1; }
+# Change to project root so relative paths (like `requirements.txt`)
+# resolve correctly even when the script is run from elsewhere.
+cd "$PROJECT_ROOT" || { echo "Failed to cd to project root: $PROJECT_ROOT"; exit 1; }
 
 python3 -m venv .venv
+# shellcheck source=/dev/null
 source .venv/bin/activate
-pip install --upgrade pip
+python -m pip install --upgrade pip
 pip install -r requirements.txt
