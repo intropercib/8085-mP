@@ -8,7 +8,7 @@ Quick start
 -----------
 Prerequisites:
 - Python 3.12+ (recommended)
-- Project dependencies in the repository's `Backend/requirements.txt`
+- Project dependencies in the repository's `requirements.txt`
 
 Run the CLI:
 
