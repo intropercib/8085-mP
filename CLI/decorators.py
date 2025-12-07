@@ -1,5 +1,7 @@
 from functools import wraps
 from Backend.M8085._utils import encode, decode
+from groq import Groq
+import keyring
 
 def process_memory(func):
     """
@@ -68,29 +70,52 @@ def process_memory(func):
 
     return wrapper
 
-from groq import Groq
 
-'''
-'body': {'error': {'message': 'Invalid API Key', 'type': 'invalid_request_error', 'code': 'invalid_api_key'
-'''
+def get_api_key():
+    service_name = "8085mp"
+    key_name = "groq_api_key"
+    key = keyring.get_password(service_name, key_name)
+    if key:
+        return key
 
-client = Groq(api_key='gsk q23yLQSExLXhdBD3p3h1WGdyb3FYhNJP1WGWSUJCXpSUHM4i8K')
-try:
-    completion = client.chat.completions.create(
-        model="openai/gpt-oss-120b",
-        messages=[
-            {
-                "role": "user",
-                "content": "Explain why fast inference is critical for reasoning models",
-            }
-        ]
-    )
-    print(completion.choices[0].message.content)
-except Exception as e:
-    
+# Helper: Groq API request decorator
+def groq_request(max_tokens):
 
-    msg = e.__dict__
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self, user_prompt):
+            api_key = get_api_key()
+            if api_key:
+                client = Groq(api_key=api_key)
+            else:
+                self.response("API key not found. Please set your Groq API key using setkey command. You can go to https://console.groq.com/keys to create one.", style="error")
+                return None
+            try:
+                response =  client.chat.completions.create(
+                    model="openai/gpt-oss-120b",
+                    temperature=0.3,
+                    max_completion_tokens=max_tokens,
+                    messages=[
+                        {"role": "system", "content": "pre_prompt"},
+                        {"role": "user", "content": user_prompt}
+                    ]
+                ).choices[0].message.content
 
-    print(
-        msg
-    )
+                return func(self, response)
+                
+            except Exception as e:
+                # Your exact existing error parser logic
+                msg = e.__dict__
+
+                if msg.get("body") is not None:
+                    body = msg.get("body")
+                    if body.get("error") is not None:
+                        error = body.get("error")
+                        self.response(f"Message: {error.get("message")}\nType: {error.get("type")}\nCode: {error.get("code")}", style="error")
+                        return None                     
+
+                self.response(f"Error: {msg.get("message", "Internal error. Please report this.")}", style="error")
+                return None
+
+        return wrapper
+    return decorator
