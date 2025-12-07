@@ -97,14 +97,14 @@ class Interface(Cmd):
         
         self.code = ""
     
-    def do_show_programs(self, arg):
+    def do_showprograms(self, arg):
         """Display all available .asm program files in the programs directory.
         
         Usage:
-            show_programs
+            showprograms
         
         Example:
-            > show_programs
+            > showprograms
         
         Notes:
             - Shows files from home/Documents/8085_Programs/
@@ -227,6 +227,33 @@ class Interface(Cmd):
         console.print(table)
         console.print()
     
+    def do_timingdiagram(self, arg):
+        arg = arg.strip().upper()
+        """Display the timing diagram for a specified 8085 instruction.
+        
+        Usage:
+            timingdiagram <instruction>
+        
+        Example:
+            > timingdiagram MOV
+        Notes:
+            - Instruction should be a valid 8085 mnemonic (e.g., MOV, MVI, ADD)
+            - Displays the timing diagram as ASCII art in the terminal
+        """
+        import webbrowser
+        from Backend.M8085._timing import TimingDiagram
+
+        td = TimingDiagram()
+        fig = td.as_dict(arg)
+        if fig.get('success'):
+            # Create data URL and open in browser
+            webbrowser.open(fig['diagram'])
+            self.response(f"Timing diagram for instruction '{arg}' opened in web browser.", style="success")
+        
+        else:
+            self.response(f"Error: {fig['error']}", style="error")
+
+    
     def do_setkey(self, arg):
         """Store your Groq API key securely in the system keyring.
         
@@ -329,7 +356,6 @@ class Interface(Cmd):
         return True  
     
     def do_help(self, arg):
-        cmds = [cmd_name for cmd_name in self.get_names() if cmd_name.startswith('do_')]
         if arg:
             try:
                 func = getattr(self, 'do_' + arg)
@@ -337,6 +363,7 @@ class Interface(Cmd):
             except AttributeError:
                 self.response(f"No such command: {arg}", style="error")
         else:
+            cmds = [cmd_name for cmd_name in self.get_names() if cmd_name.startswith('do_')]
             console.print("[label]Available Commands:[/]")
             table = create_table("Command", title="COMMANDS")
             for _ in cmds:
@@ -344,6 +371,27 @@ class Interface(Cmd):
             console.print(table)
 
             console.print("\nType [accent]help <command>[/accent] for detailed help on a specific command.\n")
+    
+
+    def do_docs(self, arg):
+        """Display documentation from a YAML file.
+        
+        Usage:
+            docs <path_to_yaml_file>
+        
+        Example:
+            > docs docs/commands.yaml"""
+        if arg:
+            from yaml import safe_load
+            
+            path = Path(__file__).parent.parent / "Backend" / "M8085" / "docs.yml"
+
+            with open(path, "r") as f:
+                docs = safe_load(f)
+                console.print(docs.get(arg, "No documentation found for this topic."))
+
+        else:
+            self.response("Usage: docs <name of instruction>", style="error")
 
 if __name__ == "__main__":
     interface = Interface()
