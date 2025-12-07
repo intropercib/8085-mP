@@ -3,13 +3,6 @@ MOV: |
 
   Args:
       arg (str): The arguments should be in the format 'MOV rd, rs', where 'rd' is the destination register and 'rs' is the source register.
-
-  Raises:
-      - CommaError: If the ',' is missing.
-      - SyntaxError: If the syntax is incorrect.
-      - RpError: If the provided register pair is not valid (i.e., B, C, D, E, H, L).
-      - RegisterError: If the provided register is not valid.
-      - NoArgumentError: If the instruction takes no argument.
   
   Notes:
       The MOV instruction copies the contents of the source register 'rs' to the destination register 'rd'.
@@ -23,13 +16,6 @@ MVI: |
 
   Args:
       arg (str): String representing the instruction with register and 8-bit data.
-
-  Raises:
-      - CommaError: If the ',' is missing.
-      - SyntaxError: If the syntax is incorrect.
-      - RpError: If the provided register pair is not valid (i.e., B, C, D, E, H, L).
-      - RegisterError: If the provided register is not valid.
-      - DataError: If the provided data is not valid (not 8-bit).
   
   Notes:
       The MVI instruction moves immediate 8-bit data into the specified register.
@@ -43,12 +29,6 @@ LXI: |
 
   Args:
       arg (str): String representing the instruction with register pair and 16-bit data.
-
-  Raises:
-      - CommaError: If the ',' is missing.
-      - SyntaxError: If the syntax is incorrect.
-      - RpError: If the provided register pair is not valid (i.e., B, D, H).
-      - MemoryError: If the provided memory address is not valid.
   
   Notes:
       The LXI instruction loads 16-bit immediate data into the specified register pair.
@@ -63,9 +43,6 @@ LDA: |
   Args:
       arg (str): String representing the instruction with the memory address.
 
-  Raises:
-      - MemoryError: If the provided memory address is not valid.
-
   Example:
       > LDA 2000H
       Loads the accumulator with the contents stored at the memory address 2000H.
@@ -75,9 +52,6 @@ STA: |
 
   Args:
       arg (str): String representing the instruction with the memory address.
-
-  Raises:
-      - MemoryError: If the provided memory address is not valid.
 
   Example:
       > STA 2000H
@@ -89,9 +63,6 @@ LDAX: |
   Args:
       arg (str): String representing the instruction with the register pair.
 
-  Raises:
-      - RpError: If the provided register pair is not valid.
-
   Example:
       > LDAX B
       Loads the accumulator with the contents of the memory location specified by the register pair B.
@@ -101,9 +72,6 @@ STAX: |
 
   Args:
       arg (str): String representing the instruction with the register pair.
-
-  Raises:
-      - RpError: If the provided register pair is not valid.
 
   Example:
       > STAX D
@@ -115,9 +83,6 @@ LHLD: |
   Args:
       arg (str): 16-bit memory location in hexadecimal.
 
-  Raises:
-      - MemoryError: If the provided memory address is not valid.
-
   Example:
       > LHLD 2000H
 
@@ -126,9 +91,6 @@ SHLD: |
 
   Args:
       arg (str): 16-bit memory location in hexadecimal.
-
-  Raises:
-      - MemoryError: If the provided memory address is not valid.
 
   Example:
       > SHLD 2000H
@@ -139,9 +101,6 @@ IN: |
   Args:
       arg (str): 8-bit port location in hexadecimal.
 
-  Raises:
-      - PortError: If the port location is not valid.
-
   Example:
       > IN 10H
 
@@ -151,9 +110,6 @@ OUT: |
   Args:
       arg (str): 8-bit port location in hexadecimal.
 
-  Raises:
-      - PortError: If the port location is not valid.
-
   Example:
       > OUT 20H
 
@@ -162,9 +118,6 @@ XCHG: |
 
   Args:
       arg (str): Not used.
-
-  Raises:
-      - NoArgumentError: If the command is followed by an argument (XCHG takes no argument).
 
   Example:
       > XCHG
@@ -177,10 +130,6 @@ ADD: |
   Args:
       arg (str): The register (r) whose content will be added to the accumulator.
 
-  Raises:
-      - SyntaxError: If the syntax is incorrect or if there are additional parameters.
-      - RegisterError: If the specified register (r) is not valid.
-
   Example:
       > ADD B
       Adds the content of register B to the accumulator.
@@ -190,11 +139,6 @@ ADC: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) whose content will be added to the accumulator along with the carry.
-
-  Raises:
-      - CommaError: If the ',' is missing.
-      - SyntaxError: If the syntax is incorrect.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > ADC A
@@ -208,10 +152,6 @@ ADI: |
   Args:
       arg (str): The 8-bit data to be added to the accumulator.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
-
   Example:
       > ADI 42H
       Adds the immediate value 42 to the accumulator.
@@ -222,10 +162,6 @@ DAD: |
   Args:
       arg (str): The register pair (Rp) whose content will be added to the H-L register pair.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RpError: If 'Rp' is not a valid register pair.
-
   Example:
       > DAD B
       Adds the contents of register pair B-C to register pair H-L.
@@ -235,10 +171,6 @@ SUB: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) whose content will be subtracted from the accumulator.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > SUB B
@@ -252,10 +184,6 @@ SUI: |
   Args:
       arg (str): The 8-bit data to be subtracted from the accumulator.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
-
   Example:
       > SUI 42H
       Subtracts the immediate value 42 from the accumulator.
@@ -266,10 +194,6 @@ SBI: |
   Args:
       arg (str): The 8-bit data to be subtracted along with the carry from the accumulator.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
-
   Example:
       > SBI 42H
       Subtracts the immediate value 42 along with the carry from the accumulator.
@@ -279,10 +203,6 @@ SBB: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) whose content will be subtracted along with the borrow from the accumulator.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > SBB B
@@ -296,10 +216,6 @@ INR: |
   Args:
       arg (str): The register (r) or 'M' (for memory) whose content will be incremented.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
-
   Example:
       > INR B
       Increments the content of register B.
@@ -312,10 +228,6 @@ INX: |
   Args:
       arg (str): The register pair (Rp) to be incremented.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RpError: If 'Rp' is not a valid register pair.
-
   Example:
       > INX B
       Increments the register pair B-C.
@@ -326,10 +238,6 @@ DCX: |
   Args:
       arg (str): The register pair (Rp) to be decremented.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RpError: If 'Rp' is not a valid register pair.
-
   Example:
       > DCX B
       Decrements the register pair B-C.
@@ -339,10 +247,6 @@ DCR: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) whose content will be decremented.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > DCR B
@@ -396,10 +300,6 @@ ANI: |
   Args:
       arg (str): The immediate 8-bit data to perform the AND operation with.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
-
   Example:
       > ANI 42H
       Performs bitwise AND operation between the accumulator and 42H.
@@ -409,10 +309,6 @@ ORI: |
 
   Args:
       arg (str): The immediate 8-bit data to perform the OR operation with.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
 
   Example:
       > ORI 3AH
@@ -424,10 +320,6 @@ XRI: |
   Args:
       arg (str): The immediate 8-bit data to perform the XOR operation with.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - DataError: If the parameter is not a valid 8-bit data.
-
   Example:
       > XRI FFH
       Performs bitwise XOR operation between the accumulator and FFH.
@@ -437,10 +329,6 @@ ANA: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) to perform the AND operation with.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > ANA B
@@ -454,10 +342,6 @@ ORA: |
   Args:
       arg (str): The register (r) or 'M' (for memory) to perform the OR operation with.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
-
   Example:
       > ORA B
       Performs bitwise OR operation between the accumulator and register B.
@@ -469,10 +353,6 @@ XRA: |
 
   Args:
       arg (str): The register (r) or 'M' (for memory) to perform the XOR operation with.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register or 'M'.
 
   Example:
       > XRA B
@@ -506,10 +386,6 @@ PUSH: |
   Args:
       arg (str): The register pair to push onto the stack.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register pair.
-
   Example:
       > PUSH B
       Pushes the contents of register pair BC onto the stack.
@@ -519,10 +395,6 @@ POP: |
 
   Args:
       arg (str): The register pair to pop from the stack.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - RegisterError: If the parameter is not a valid register pair.
 
   Example:
       > POP H
@@ -564,10 +436,6 @@ JMP: |
   Args:
       arg (str): The memory address to jump to.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
-
   Example:
       > JMP 2000H
       Unconditionally jumps to the memory address 2000H.
@@ -577,10 +445,6 @@ JC: |
 
   Args:
       arg (str): The memory address to jump to if carry flag is set.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
 
   Example:
       > JC 3000H
@@ -592,10 +456,6 @@ JNC: |
   Args:
       arg (str): The memory address to jump to if carry flag is not set.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
-
   Example:
       > JNC 4000H
       Jumps to the memory address 4000H if the carry flag is not set.
@@ -605,10 +465,6 @@ JZ: |
 
   Args:
       arg (str): The memory address to jump to if zero flag is set.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
 
   Example:
       > JZ 5000H
@@ -620,10 +476,6 @@ JNZ: |
   Args:
       arg (str): The memory address to jump to if zero flag is not set.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
-
   Example:
       > JNZ 6000H
       Jumps to the memory address 6000H if the zero flag is not set.
@@ -633,10 +485,6 @@ JM: |
 
   Args:
       arg (str): The memory address to jump to if sign flag is set.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
 
   Example:
       > JM 7000H
@@ -648,10 +496,6 @@ JP: |
   Args:
       arg (str): The memory address to jump to if sign flag is not set.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the parameter is not a valid memory address.
-
   Example:
       > JP 8000H
       Jumps to the memory address 8000H if the sign flag is not set (positive).
@@ -661,10 +505,6 @@ CALL: |
 
   Args:
       arg (str): The memory address (in hexadecimal) to call.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
 
   Example:
       > CALL 2000H
@@ -676,10 +516,6 @@ CC: |
   Args:
       arg (str): The memory address (in hexadecimal) to call.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
-
   Example:
       > CC 2000H
       Calls the subroutine at memory address 2000H if the carry flag is set.
@@ -689,10 +525,6 @@ CZ: |
 
   Args:
       arg (str): The memory address (in hexadecimal) to call.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
 
   Example:
       > CZ 2000H
@@ -704,10 +536,6 @@ CNZ: |
   Args:
       arg (str): The memory address (in hexadecimal) to call.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
-
   Example:
       > CNZ 2000H
       Calls the subroutine at memory address 2000H if the zero flag is reset.
@@ -717,10 +545,6 @@ CM: |
 
   Args:
       arg (str): The memory address (in hexadecimal) to call.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
 
   Example:
       > CM 2000H
@@ -732,10 +556,6 @@ CP: |
   Args:
       arg (str): The memory address (in hexadecimal) to call.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
-
   Example:
       > CP 2000H
       Calls the subroutine at memory address 2000H if the sign flag is reset.
@@ -745,10 +565,6 @@ CPE: |
 
   Args:
       arg (str): The memory address (in hexadecimal) to call.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
 
   Example:
       > CPE 2000H
@@ -760,10 +576,6 @@ CPO: |
   Args:
       arg (str): The memory address (in hexadecimal) to call.
 
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
-
   Example:
       > CPO 2000H
       Calls the subroutine at memory address 2000H if the parity flag is reset.
@@ -773,10 +585,6 @@ CNC: |
 
   Args:
       arg (str): The memory address (in hexadecimal) to call.
-
-  Raises:
-      - SyntaxError: If there are insufficient parameters.
-      - MemoryError: If the provided memory address is restricted or not valid.
 
   Example:
       > CNC 2000H
@@ -863,86 +671,147 @@ RNC: |
       > RNC
       Returns from the current subroutine if the carry flag is reset.
 
-exam memory: |
-  Display memory addresses and their contents.
+ACI: |
+  Add immediate 8-bit data along with the carry to the accumulator.
 
   Args:
-      arg (str): Comma-separated list of memory addresses.
+      arg (str): The 8-bit data to be added along with the carry to the accumulator.
 
-  Raises:
-      KeyError: If the provided memory address is invalid.
+  Notes:
+      The ACI instruction adds immediate 8-bit data and the carry flag to the accumulator.
 
   Example:
-      > exmin_memory 2000H, 3000H
-      +----------------+--------+
-      | Memory Address | Content|
-      +----------------+--------+
-      |     2000H      |   1A   |
-      |     3000H      |   FF   |
-      +----------------+--------+
+      > ACI 05H
+      Adds the immediate value 05H along with the carry to the accumulator.
 
-exam port: |
-  Display port addresses and their contents.
+CMP: |
+  Compare the contents of a register or memory with the accumulator.
 
   Args:
-      arg (str): Comma-separated list of port addresses.
+      arg (str): The register (r) or 'M' (for memory) to compare with the accumulator.
 
-  Raises:
-      KeyError: If the provided port address is invalid.
-
-  Example:
-      > exmin_port 10H, 20H
-      +--------------+---------+
-      | Port Address | Content |
-      +--------------+---------+
-      |     10H      |   0A    |
-      |     20H      |   FF    |
-      +--------------+---------+
-
-exam register: |
-  Display registers and their contents.
-
-  Args: None
+  Notes:
+      The CMP instruction compares by subtracting the operand from the accumulator without storing the result. It only affects flags.
 
   Example:
-      > exmin_register
-      +-----------+--------+
-      | Register  | Content|
-      +-----------+--------+
-      | A         | 1A     |
-      | B         | 2B     |
-      | ...       | ...    |
-      +-----------+--------+
+      > CMP B
+      Compares the content of register B with the accumulator.
+      > CMP M
+      Compares the content of memory pointed to by HL with the accumulator.
 
-exam flag: |
-  Display flags and their contents.
+CPI: |
+  Compare immediate 8-bit data with the accumulator.
+
+  Args:
+      arg (str): The 8-bit data to compare with the accumulator.
+
+  Notes:
+      The CPI instruction compares by subtracting the immediate data from the accumulator without storing the result. It only affects flags.
+
+  Example:
+      > CPI 0AH
+      Compares the immediate value 0AH with the accumulator.
+
+CMC: |
+  Complement the carry flag.
 
   Args:
       arg (str): Not used.
 
-  Example:
-      > exmin_flag
-      +---+---+----+---+---+
-      | S | Z | AC | P | C |
-      +---+---+----+---+---+
-      | 0 | 0 | 0  | 0 | 0 |
-      +---+---+----+---+---+
+  Notes:
+      The CMC instruction inverts the carry flag (CY). If CY=1, it becomes 0, and vice versa.
 
-exam stack: |
-  Display stack addresses and their contents.
+  Example:
+      > CMC
+      Complements (inverts) the carry flag.
+
+DAA: |
+  Decimal Adjust Accumulator.
 
   Args:
-      arg (str): Comma-separated list of stack memory addresses.
+      arg (str): Not used.
 
-  Raises:
-      KeyError: If the provided stack memory address is invalid.
+  Notes:
+      The DAA instruction adjusts the accumulator content to a valid BCD (Binary Coded Decimal) number after an arithmetic operation.
 
   Example:
-      > exam stack 5000H, 6000H, 7000H
-      +-------+--------+
-      | Index | Content|
-      +-------+--------+
-      |  5000H|   ...  |
-      |  6000H|   ...  |
-      |  7000H|   ...  |
-      +-------+--------+
+      > DAA
+      Adjusts the accumulator for BCD arithmetic.
+
+NOP: |
+  No Operation.
+
+  Args:
+      arg (str): Not used.
+
+  Notes:
+      The NOP instruction performs no operation. It is often used for timing delays or as a placeholder.
+
+  Example:
+      > NOP
+      Does nothing, taking one machine cycle.
+
+HLT: |
+  Halt the processor.
+
+  Args:
+      arg (str): Not used.
+
+  Notes:
+      The HLT instruction stops the processor execution. The processor enters a halt state until an interrupt or reset occurs.
+
+  Example:
+      > HLT
+      Halts the processor execution.
+
+JPO: |
+  Conditional jump to the specified memory address if parity flag is odd (P=0).
+
+  Args:
+      arg (str): The memory address to jump to if parity flag is odd.
+
+  Notes:
+      The JPO instruction jumps to the specified address if the parity flag indicates odd parity (P=0).
+
+  Example:
+      > JPO 4000H
+      Jumps to the memory address 4000H if the parity is odd.
+
+JPE: |
+  Conditional jump to the specified memory address if parity flag is even (P=1).
+
+  Args:
+      arg (str): The memory address to jump to if parity flag is even.
+
+  Notes:
+      The JPE instruction jumps to the specified address if the parity flag indicates even parity (P=1).
+
+  Example:
+      > JPE 5000H
+      Jumps to the memory address 5000H if the parity is even.
+
+ORG: |
+  Set the origin address for the program.
+
+  Args:
+      arg (str): The 16-bit memory address to set as the origin.
+
+  Notes:
+      The ORG directive sets the starting address for the subsequent code. It's an assembler directive, not an executable instruction.
+
+  Example:
+      > ORG 2000H
+      Sets the program counter to start at address 2000H.
+
+DB: |
+  Define Byte - Reserve byte(s) of storage.
+
+  Args:
+      arg (str): Comma-separated list of byte values or strings.
+
+  Notes:
+      The DB directive reserves and initializes byte(s) of memory with specified values. It's an assembler directive, not an executable instruction.
+
+  Example:
+      > DB 10H, 20H, 30H
+      Stores the bytes 10H, 20H, and 30H in consecutive memory locations.
