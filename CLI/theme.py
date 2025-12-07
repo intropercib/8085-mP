@@ -39,7 +39,7 @@ _THEME = Theme({
     "table.row.alt": "dim white",
 
     # Code / technical
-    "code":          "bright_yellow on grey23",
+    "code":          "bright_yellow",
     "address":       "bold bright_magenta",
     "value":         "bright_cyan",
     "instruction":   "bright_green",
@@ -117,6 +117,7 @@ def create_table(*headers: str, title: str = None) -> Table:
         box=DOUBLE_EDGE,
         show_lines=False,
         padding=(0, 1),
+        title_justify="center",
     )
     for h in headers:
         table.add_column(h, justify="center", style=STYLE["text"])
