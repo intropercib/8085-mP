@@ -9,19 +9,21 @@ $ErrorActionPreference = "Stop"
 
 $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PROJECT_ROOT = Split-Path -Parent $SCRIPT_DIR
+$CLI_DIR = Join-Path $PROJECT_ROOT "CLI"
 $BACKEND_DIR = Join-Path $PROJECT_ROOT "Backend"
-$RESOURCES_DIR = Join-Path $PROJECT_ROOT "src-tauri\resources"
+$RELEASE_DIR = Join-Path $PROJECT_ROOT "release"
 
-$ENTRY_POINT = "Server"
+$ENTRY_POINT = "CLI"
 $OUTPUT_DIR = "dist"
 
 Write-Host "================================================"
-Write-Host "  8085 Microprocessor Simulator - Backend Build Script (Windows)"
+Write-Host "  8085 Microprocessor Simulator - CLI Build Script (Windows)"
 Write-Host "================================================"
 Write-Host ""
 Write-Host "Project Root: $PROJECT_ROOT"
+Write-Host "CLI Dir:      $CLI_DIR"
 Write-Host "Backend Dir:  $BACKEND_DIR"
-Write-Host "Resources:    $RESOURCES_DIR"
+Write-Host "Release Dir:  $RELEASE_DIR"
 Write-Host ""
 
 # Ensure a project-root virtualenv exists and install requirements there
@@ -53,10 +55,10 @@ if (Test-Path $reqPath) {
 # Clean old builds
 Write-Host "Cleaning old builds..."
 $pathsToClean = @(
-    (Join-Path $BACKEND_DIR $OUTPUT_DIR),
-    (Join-Path $BACKEND_DIR "build"),
-    (Join-Path $BACKEND_DIR "*.dist"),
-    (Join-Path $BACKEND_DIR "*.build")
+    (Join-Path $PROJECT_ROOT $OUTPUT_DIR),
+    (Join-Path $PROJECT_ROOT "build"),
+    (Join-Path $PROJECT_ROOT "*.dist"),
+    (Join-Path $PROJECT_ROOT "*.build")
 )
 foreach ($path in $pathsToClean) {
     if (Test-Path $path) {
@@ -64,10 +66,10 @@ foreach ($path in $pathsToClean) {
     }
 }
 
-Write-Host "Building backend using Nuitka (onefile)..."
+Write-Host "Building CLI using Nuitka (onefile)..."
 Write-Host ""
 
-Set-Location $BACKEND_DIR
+Set-Location $PROJECT_ROOT
 
 # Check if Nuitka is installed
 try {
@@ -86,8 +88,8 @@ python -m nuitka `
     --enable-plugin=no-qt `
     --python-flag=-m `
     --assume-yes-for-downloads `
-    --include-data-files=M8085/commands_property.yml=M8085/commands_property.yml `
-    --include-data-files=M8085/docs.yml=M8085/docs.yml `
+    --include-data-files=Backend/M8085/commands_property.yml=Backend/M8085/commands_property.yml `
+    --include-data-files=Backend/M8085/docs.yml=Backend/M8085/docs.yml `
     --output-dir=$OUTPUT_DIR `
     $ENTRY_POINT
 
@@ -96,23 +98,20 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 
-Set-Location $PROJECT_ROOT
-
 Write-Host ""
 Write-Host "Nuitka build complete!"
 Write-Host ""
 
-# Create resources directory
-$backendResourcesDir = Join-Path $RESOURCES_DIR "backend"
-if (-not (Test-Path $backendResourcesDir)) {
-    New-Item -ItemType Directory -Path $backendResourcesDir -Force | Out-Null
+# Create release directory
+if (-not (Test-Path $RELEASE_DIR)) {
+    New-Item -ItemType Directory -Path $RELEASE_DIR -Force | Out-Null
 }
 
-# Copy the server binary to resources
-Write-Host "Copying server binary to resources..."
+# Copy the CLI binary to release directory
+Write-Host "Preparing CLI binary for release..."
 
-$SOURCE_BINARY = Join-Path $BACKEND_DIR "$OUTPUT_DIR\Server.exe"
-$DEST_BINARY = Join-Path $backendResourcesDir "server.exe"
+$SOURCE_BINARY = Join-Path $PROJECT_ROOT "$OUTPUT_DIR\CLI.exe"
+$DEST_BINARY = Join-Path $RELEASE_DIR "8085-simulator.exe"
 
 # Check if source binary exists
 if (-not (Test-Path $SOURCE_BINARY)) {
@@ -125,14 +124,14 @@ if (-not (Test-Path $SOURCE_BINARY)) {
 # Copy binary
 Copy-Item -Path $SOURCE_BINARY -Destination $DEST_BINARY -Force
 
-Write-Host "Server binary copied to: $DEST_BINARY"
+Write-Host "CLI binary created: $DEST_BINARY"
 
 # Verify the binary
 if (Test-Path $DEST_BINARY) {
     $size = (Get-Item $DEST_BINARY).Length / 1MB
-    Write-Host "Server binary size: $([math]::Round($size, 2)) MB"
+    Write-Host "CLI binary size: $([math]::Round($size, 2)) MB"
 } else {
-    Write-Host "Warning: Server binary may not exist at destination"
+    Write-Host "Warning: CLI binary may not exist at destination"
 }
 
 Write-Host ""
@@ -140,10 +139,12 @@ Write-Host "================================================"
 Write-Host "  Build Summary"
 Write-Host "================================================"
 Write-Host ""
-Write-Host "Backend binary:  $DEST_BINARY"
-Write-Host "Resources dir:   $backendResourcesDir"
+Write-Host "CLI binary:      $DEST_BINARY"
+Write-Host "Release dir:     $RELEASE_DIR"
 Write-Host ""
-Write-Host "Next steps:"
-Write-Host "   1. Run 'npm run tauri build' to create the bundled application"
-Write-Host "   2. Find output in src-tauri\target\release\bundle\"
+Write-Host "Usage:"
+Write-Host "   Run the CLI: $DEST_BINARY"
+Write-Host ""
+Write-Host "For development:"
+Write-Host "   python -m CLI"
 Write-Host ""
