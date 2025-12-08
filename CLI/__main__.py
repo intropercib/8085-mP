@@ -227,15 +227,15 @@ class Interface(Cmd):
         console.print(table)
         console.print()
     
-    def do_timingdiagram(self, arg):
+    def do_timing(self, arg):
         arg = arg.strip().upper()
         """Display the timing diagram for a specified 8085 instruction.
         
         Usage:
-            timingdiagram <instruction>
+            timing <instruction>
         
         Example:
-            > timingdiagram MOV
+            > timing MOV
         Notes:
             - Instruction should be a valid 8085 mnemonic (e.g., MOV, MVI, ADD)
             - Displays the timing diagram as ASCII art in the terminal
@@ -245,13 +245,13 @@ class Interface(Cmd):
 
         td = TimingDiagram()
         fig = td.as_dict(arg)
-        if fig.get('success'):
+        if fig:
             # Create data URL and open in browser
             webbrowser.open(fig['diagram'])
-            self.response(f"Timing diagram for instruction '{arg}' opened in web browser.", style="success")
-        
+            self.response(f"Timing diagram for instruction '{arg}' opened in web browser.", style="success")    
+            
         else:
-            self.response(f"Error: {fig['error']}", style="error")
+            self.response(f"Error: No instruction named {arg}", style="error")
 
     
     def do_setkey(self, arg):
@@ -363,7 +363,7 @@ class Interface(Cmd):
             except AttributeError:
                 self.response(f"No such command: {arg}", style="error")
         else:
-            cmds = [cmd_name for cmd_name in self.get_names() if cmd_name.startswith('do_')]
+            cmds = [cmd_name[3:] for cmd_name in self.get_names() if cmd_name.startswith('do_')]
             console.print("[label]Available Commands:[/]")
             table = create_table("Command", title="COMMANDS")
             for _ in cmds:
@@ -382,6 +382,7 @@ class Interface(Cmd):
         Example:
             > docs docs/commands.yaml"""
         if arg:
+            arg = arg.upper()
             from yaml import safe_load
             
             path = Path(__file__).parent.parent / "Backend" / "M8085" / "docs.yml"
