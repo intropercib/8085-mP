@@ -85,11 +85,11 @@ echo ""
 echo "🎉 Nuitka build complete!"
 echo ""
 
-# Create release directory
-mkdir -p "$RELEASE_DIR"
-
 # Copy the CLI binary to release directory
 echo "📦 Preparing CLI binary for release..."
+
+# Create release directory
+mkdir -p "$RELEASE_DIR"
 
 # Detect OS and set correct binary name
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then

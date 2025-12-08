@@ -102,13 +102,13 @@ Write-Host ""
 Write-Host "Nuitka build complete!"
 Write-Host ""
 
+# Copy the CLI binary to release directory
+Write-Host "Preparing CLI binary for release..."
+
 # Create release directory
 if (-not (Test-Path $RELEASE_DIR)) {
     New-Item -ItemType Directory -Path $RELEASE_DIR -Force | Out-Null
 }
-
-# Copy the CLI binary to release directory
-Write-Host "Preparing CLI binary for release..."
 
 $SOURCE_BINARY = Join-Path $PROJECT_ROOT "$OUTPUT_DIR\CLI.exe"
 $DEST_BINARY = Join-Path $RELEASE_DIR "8085-simulator.exe"

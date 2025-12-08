@@ -25,4 +25,3 @@ dist-ssr
 
 # python virtual environment
 .venv
-release
