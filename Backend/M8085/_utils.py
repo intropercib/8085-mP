@@ -2,8 +2,6 @@
 
 from pathlib import Path
 import yaml
-from .logs import setup_logger, warn
-setup_logger()
 
 PATH = Path(__file__).parent
 
@@ -15,8 +13,7 @@ def decode(arg: str) -> int | None:
     arg = arg[:-1]  # Remove 'H' suffix
     try:
         return int(arg, 16)
-    except ValueError:
-        warn(f"Invalid Address: {arg}")
+    except ValueError: pass
 
 def encode(arg: int, bit: int = 2) -> str:
     """Convert integer to hex string with specified nibble width.

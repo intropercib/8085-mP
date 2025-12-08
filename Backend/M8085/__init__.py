@@ -16,10 +16,8 @@ from ._stack import Stack
 from ._branch import Branch
 from ._timing import TimingDiagram
 from ._memory import Memory, Register, Flag, Assembler
-from .logs import setup_logger, info
 
 RUNTIME = 10000
-setup_logger()
 class Processor:
     """Main simulator class. Parses, assembles, and executes 8085 code.
     
@@ -89,7 +87,7 @@ class Processor:
             try: # Handle No Return cases
                 pc = self.__register['PC']
                 inst , *code = stack[pc]
-                info(f"{pc} {inst} {code}")
+                
             
             except KeyError:
                 self.__cp = "infinite_loop"
@@ -105,7 +103,7 @@ class Processor:
 
                 if isinstance(self.inst[inst].__self__, Branch):
                     self.__rt += 1
-                    info(f"{pc} {inst} {code}")
+                    
                     continue
 
                 else:
@@ -113,7 +111,7 @@ class Processor:
                     self.__register['PC'] = operate(self.__register['PC'], inr, bit=4)                
                 self.__rt += 1
             
-            info(f"{pc} {inst} {code}")
+            
         
         self.__rt = 0
         return 0
