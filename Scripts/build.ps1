@@ -11,7 +11,6 @@ $SCRIPT_DIR = Split-Path -Parent $MyInvocation.MyCommand.Path
 $PROJECT_ROOT = Split-Path -Parent $SCRIPT_DIR
 $CLI_DIR = Join-Path $PROJECT_ROOT "CLI"
 $BACKEND_DIR = Join-Path $PROJECT_ROOT "Backend"
-$RELEASE_DIR = Join-Path $PROJECT_ROOT "release"
 
 $ENTRY_POINT = "CLI"
 $OUTPUT_DIR = "dist"
@@ -23,7 +22,7 @@ Write-Host ""
 Write-Host "Project Root: $PROJECT_ROOT"
 Write-Host "CLI Dir:      $CLI_DIR"
 Write-Host "Backend Dir:  $BACKEND_DIR"
-Write-Host "Release Dir:  $RELEASE_DIR"
+Write-Host "Output Dir:   $PROJECT_ROOT\$OUTPUT_DIR"
 Write-Host ""
 
 # Ensure a project-root virtualenv exists and install requirements there
@@ -140,7 +139,7 @@ Write-Host "  Build Summary"
 Write-Host "================================================"
 Write-Host ""
 Write-Host "CLI binary:      $DEST_BINARY"
-Write-Host "Release dir:     $RELEASE_DIR"
+Write-Host "Output dir:      $PROJECT_ROOT\$OUTPUT_DIR"
 Write-Host ""
 Write-Host "Usage:"
 Write-Host "   Run the CLI: $DEST_BINARY"

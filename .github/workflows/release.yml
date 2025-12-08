@@ -64,7 +64,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p cli-artifact
-          cp release/${{ matrix.binary_name }} cli-artifact/${{ matrix.binary_name }}
+          cp dist/${{ matrix.binary_name }} cli-artifact/${{ matrix.binary_name }}
           if [ "${{ matrix.os_name }}" != "windows" ]; then
             chmod +x cli-artifact/${{ matrix.binary_name }}
           fi

@@ -24,11 +24,14 @@ echo ""
 # Create release directory
 mkdir -p "$RELEASE_DIR"
 
-# Find and copy all CLI binary artifacts
+# Find and copy all CLI binary artifacts from dist directories
 echo "Collecting CLI binary artifacts..."
 
-# Copy all CLI binaries (regardless of naming convention)
+# Copy all CLI binaries from dist folders in artifacts
 find "$ARTIFACTS_DIR" -type f \( -name "8085-simulator*" -o -name "8085-simulator-*" \) -exec cp {} "$RELEASE_DIR/" \; 2>/dev/null || true
+
+# Also search in dist subdirectories
+find "$ARTIFACTS_DIR" -path "*/dist/*" -type f \( -name "8085-simulator*" -o -name "8085-simulator-*" \) -exec cp {} "$RELEASE_DIR/" \; 2>/dev/null || true
 
 echo ""
 echo "================================================"
