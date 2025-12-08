@@ -3,9 +3,7 @@
 from ._base import Instruction
 from ._memory import Memory, Register, decode_rp, encode_rp
 from ._utils import encode, decode
-from .logs import setup_logger, error
 
-setup_logger()
 class Data(Instruction):
     """Implements data movement between registers, memory, and immediate values."""
 
@@ -41,16 +39,12 @@ class Data(Instruction):
             self._register['A'] = self._memory[decode_rp('B')]
         elif rp == 'D':
             self._register['A'] = self._memory[decode_rp('D')]
-        else:
-            error(f"Invalid Register Pair: {rp}")
     
     def __stax(self,rp:str):
         if rp == 'B':
             self._memory[decode_rp('B')] = self._register['A']
         elif rp == 'D':
             self._memory[decode_rp('D')] = self._register['A']
-        else:
-            error(f"Invalid Register Pair: {rp}")
 
     def __lhld(self,ma:str):
         self._register['L'] = self._memory[ma]

@@ -2,8 +2,6 @@
 
 from abc import ABC, abstractmethod
 from typing import Dict, Callable
-from .logs import setup_logger, error
-setup_logger()
 
 class Instruction(ABC):
     """Abstract base class that all instruction categories must inherit from.
@@ -16,7 +14,7 @@ class Instruction(ABC):
         try:
             return self.get_inst()[key]
         except KeyError:
-            error(f"Instruction '{key}' not found.")
+            return f"Instruction '{key}' not found."
 
     @abstractmethod
     def get_inst(self) -> Dict[str, Callable]:
