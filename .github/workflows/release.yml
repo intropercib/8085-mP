@@ -12,18 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: ubuntu-22.04
-            os_name: linux
-            binary_name: 8085-simulator-linux
-          - platform: windows-latest
-            os_name: windows
-            binary_name: 8085-simulator.exe
-          - platform: macos-13
-            os_name: macos-x64
-            binary_name: 8085-simulator-macos-x64
-          - platform: macos-14
-            os_name: macos-arm64
-            binary_name: 8085-simulator-macos-arm64
+              - platform: ubuntu-22.04
+                os_name: linux
+                binary_name: 8085-simulator-linux
+              - platform: windows-latest
+                os_name: windows
+                binary_name: 8085-simulator.exe
 
     runs-on: ${{ matrix.platform }}
     
@@ -147,11 +141,9 @@ jobs:
             Run the binary and type `help` to see available commands.
             
             ### Binaries
-            
+
             - **Linux**: `8085-simulator-linux`
             - **Windows**: `8085-simulator.exe`
-            - **macOS Intel**: `8085-simulator-macos-x64`
-            - **macOS Apple Silicon**: `8085-simulator-macos-arm64`
           files: release-files/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

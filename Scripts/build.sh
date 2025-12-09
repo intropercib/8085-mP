@@ -101,8 +101,9 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     SOURCE_BINARY="$PROJECT_ROOT/$OUTPUT_DIR/CLI.bin"
     DEST_BINARY="$RELEASE_DIR/8085-simulator-macos"
 else
+    # Default to Linux naming for non-Windows builds (used by CI)
     SOURCE_BINARY="$PROJECT_ROOT/$OUTPUT_DIR/CLI.bin"
-    DEST_BINARY="$RELEASE_DIR/8085-simulator"
+    DEST_BINARY="$RELEASE_DIR/8085-simulator-linux"
 fi
 
 # Check if source binary exists
