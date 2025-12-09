@@ -51,8 +51,12 @@ class Interface(Cmd):
         """
         if os.name == 'nt': os.system('CLS')
         elif os.name == 'posix': os.system('clear')
+    
+    def emptyline(self):
+        return 
 
     def default(self, line):
+        print(line)
         self.code += line + "\n"
     
     def do_run(self, arg:str):
@@ -246,9 +250,16 @@ class Interface(Cmd):
         td = TimingDiagram()
         fig = td.as_dict(arg)
         if fig:
-            # Create data URL and open in browser
-            webbrowser.open(fig['diagram'])
-            self.response(f"Timing diagram for instruction '{arg}' opened in web browser.", style="success")    
+            import base64, tempfile
+            base = fig['diagram'].split(',')[-1]
+            binary = base64.b64decode(base)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                tmp.write(binary)
+                tmp_path = tmp.name
+                tmp.flush()
+                
+            webbrowser.open(f"file://{tmp_path}")
+            self.do_clear(0)
             
         else:
             self.response(f"Error: No instruction named {arg}", style="error")
