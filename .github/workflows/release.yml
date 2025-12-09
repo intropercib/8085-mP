@@ -45,7 +45,9 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install -r requirements.txt || true
+          # Ensure Nuitka is available for the build (not always present in requirements)
+          python -m pip install --upgrade nuitka
 
       - name: Build CLI with Nuitka (Unix)
         if: matrix.os_name != 'windows'
@@ -60,14 +62,33 @@ jobs:
         run: |
           .\Scripts\build.ps1
 
-      - name: Prepare CLI artifact
+      - name: Prepare CLI artifact (Unix)
+        if: matrix.os_name != 'windows'
         shell: bash
         run: |
           mkdir -p cli-artifact
-          cp dist/${{ matrix.binary_name }} cli-artifact/${{ matrix.binary_name }}
-          if [ "${{ matrix.os_name }}" != "windows" ]; then
-            chmod +x cli-artifact/${{ matrix.binary_name }}
+          # Find the first executable in release/ and copy it, normalizing the name
+          SRC=$(find release -maxdepth 1 -type f -executable -printf "%f\n" 2>/dev/null | head -n1 || true)
+          if [ -z "$SRC" ]; then
+            echo "No built binary found in release/"
+            ls -la release || true
+            exit 1
           fi
+          cp "release/$SRC" "cli-artifact/${{ matrix.binary_name }}"
+          chmod +x "cli-artifact/${{ matrix.binary_name }}"
+
+      - name: Prepare CLI artifact (Windows)
+        if: matrix.os_name == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path cli-artifact | Out-Null
+          $src = Get-ChildItem -Path release -File | Where-Object { $_.Name -like '8085-simulator*' } | Select-Object -First 1
+          if (-not $src) {
+            Write-Error 'No built binary found in release/'
+            Get-ChildItem release -Recurse
+            exit 1
+          }
+          Copy-Item $src.FullName -Destination "cli-artifact\${{ matrix.binary_name }}" -Force
 
       - name: Upload CLI artifact
         uses: actions/upload-artifact@v4
