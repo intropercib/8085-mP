@@ -15,6 +15,9 @@ $BACKEND_DIR = Join-Path $PROJECT_ROOT "Backend"
 $ENTRY_POINT = "CLI"
 $OUTPUT_DIR = "dist"
 
+# Where to place final release artifact
+$RELEASE_DIR = Join-Path $PROJECT_ROOT "release"
+
 Write-Host "================================================"
 Write-Host "  8085 Microprocessor Simulator - CLI Build Script (Windows)"
 Write-Host "================================================"
@@ -112,12 +115,19 @@ if (-not (Test-Path $RELEASE_DIR)) {
 $SOURCE_BINARY = Join-Path $PROJECT_ROOT "$OUTPUT_DIR\CLI.exe"
 $DEST_BINARY = Join-Path $RELEASE_DIR "8085-simulator.exe"
 
-# Check if source binary exists
+# Check if source binary exists; if not, try to find a candidate in the output dir
 if (-not (Test-Path $SOURCE_BINARY)) {
-    Write-Host "Error: Binary not found at $SOURCE_BINARY"
-    Write-Host "   Looking for alternatives..."
-    Get-ChildItem -Path (Join-Path $BACKEND_DIR $OUTPUT_DIR) -ErrorAction SilentlyContinue
-    exit 1
+    Write-Host "Warning: Binary not found at $SOURCE_BINARY"
+    Write-Host "   Searching $PROJECT_ROOT\$OUTPUT_DIR for executable candidates..."
+    $candidate = Get-ChildItem -Path (Join-Path $PROJECT_ROOT $OUTPUT_DIR) -File -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($candidate) {
+        $SOURCE_BINARY = $candidate.FullName
+        Write-Host "   Found candidate: $SOURCE_BINARY"
+    } else {
+        Write-Host "   No suitable binary found in $PROJECT_ROOT\$OUTPUT_DIR"
+        Get-ChildItem -Path (Join-Path $PROJECT_ROOT $OUTPUT_DIR) -Recurse -ErrorAction SilentlyContinue
+        exit 1
+    }
 }
 
 # Copy binary

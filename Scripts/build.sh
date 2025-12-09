@@ -13,6 +13,9 @@ BACKEND_DIR="$PROJECT_ROOT/Backend"
 ENTRY_POINT="CLI"
 OUTPUT_DIR="dist"
 
+# Where to place final release artifact
+RELEASE_DIR="$PROJECT_ROOT/release"
+
 echo "================================================"
 echo "  8085 Microprocessor Simulator - CLI Build Script"
 echo "================================================"
@@ -105,9 +108,17 @@ fi
 # Check if source binary exists
 if [ ! -f "$SOURCE_BINARY" ]; then
     echo "❌ Error: Binary not found at $SOURCE_BINARY"
-    echo "   Looking for alternatives..."
-    ls -la "$BACKEND_DIR/$OUTPUT_DIR/" 2>/dev/null || echo "   Output directory does not exist"
-    exit 1
+    echo "   Searching $PROJECT_ROOT/$OUTPUT_DIR for candidate binaries..."
+    # Try to find a likely candidate in the output directory (executable with ENTRY_POINT prefix)
+    CANDIDATE=$(find "$PROJECT_ROOT/$OUTPUT_DIR" -maxdepth 1 -type f -executable -name "${ENTRY_POINT}*" -printf "%f\n" 2>/dev/null | head -n1) || true
+    if [ -n "$CANDIDATE" ]; then
+        SOURCE_BINARY="$PROJECT_ROOT/$OUTPUT_DIR/$CANDIDATE"
+        echo "   Found candidate: $SOURCE_BINARY"
+    else
+        echo "   No suitable binary found in $PROJECT_ROOT/$OUTPUT_DIR"
+        ls -la "$PROJECT_ROOT/$OUTPUT_DIR/" 2>/dev/null || echo "   Output directory does not exist"
+        exit 1
+    fi
 fi
 
 # Copy and set permissions
