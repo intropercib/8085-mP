@@ -56,7 +56,7 @@ class Interface(Cmd):
         return 
 
     def default(self, line):
-        print(line)
+        line = str(line).upper()
         self.code += line + "\n"
     
     def do_run(self, arg:str):
